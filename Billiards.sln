@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36804.6 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Billiards", "Billiards\Billiards.csproj", "{A46C13C2-6563-4846-8317-7BFC97AB1EB3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A46C13C2-6563-4846-8317-7BFC97AB1EB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A46C13C2-6563-4846-8317-7BFC97AB1EB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A46C13C2-6563-4846-8317-7BFC97AB1EB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A46C13C2-6563-4846-8317-7BFC97AB1EB3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {63D212F7-CF5C-4D1C-A4D2-3F112FC27E6B}
+	EndGlobalSection
+EndGlobal

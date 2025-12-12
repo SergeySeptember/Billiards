@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="Billiards.Views.MatchView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewModels="clr-namespace:Billiards.ViewModels"
+    x:DataType="viewModels:MatchViewModel">
+
+    <ScrollView>
+        <Grid Padding="16"
+              RowSpacing="12"
+              ColumnSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <!-- 0: Тип бильярда -->
+                <RowDefinition Height="Auto" />
+                <!-- 1: Имена игроков -->
+                <RowDefinition Height="Auto" />
+                <!-- 2: Заголовок: основные -->
+                <RowDefinition Height="Auto" />
+                <!-- 3: Основные: значения -->
+                <RowDefinition Height="Auto" />
+                <!-- 4: Основные: кнопки -->
+                <RowDefinition Height="Auto" />
+                <!-- 5: Заголовок: случайные -->
+                <RowDefinition Height="Auto" />
+                <!-- 6: Случайные: значения -->
+                <RowDefinition Height="Auto" />
+                <!-- 7: Случайные: кнопки -->
+                <RowDefinition Height="Auto" />
+                <!-- 8: Заголовок: штрафы -->
+                <RowDefinition Height="Auto" />
+                <!-- 9: Штрафы: значения -->
+                <RowDefinition Height="Auto" />
+                <!-- 10: Штрафы: кнопки -->
+                <RowDefinition Height="Auto" />
+                <!-- 11: Таймер -->
+                <RowDefinition Height="Auto" />
+                <!-- 12: Старт/Пауза + Стоп -->
+                <RowDefinition Height="Auto" />
+                <!-- 13: Новая партия -->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Тип бильярда -->
+            <Picker
+                Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Title="Вид бильярда"
+                ItemsSource="{Binding GameTypes}"
+                SelectedItem="{Binding SelectedGameType}" />
+
+            <!-- Имена игроков -->
+            <Grid Grid.Row="1"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Игрок A" />
+                    <Entry Text="{Binding PlayerAName}"
+                           IsEnabled="{Binding IsNamesEditable}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Игрок B" />
+                    <Entry Text="{Binding PlayerBName}"
+                           IsEnabled="{Binding IsNamesEditable}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Основные забитые шары -->
+            <Label Grid.Row="2"
+                   Grid.ColumnSpan="2"
+                   Text="Основные забитые шары"
+                   FontAttributes="Bold" />
+
+            <Grid Grid.Row="3"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Entry Grid.Column="0"
+                       HorizontalTextAlignment="Center"
+                       Keyboard="Numeric"
+                       Text="{Binding MainBallsA}" />
+
+                <Entry Grid.Column="1"
+                       HorizontalTextAlignment="Center"
+                       Keyboard="Numeric"
+                       Text="{Binding MainBallsB}" />
+            </Grid>
+
+            <Grid Grid.Row="4"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <HorizontalStackLayout Grid.Column="0"
+                                       HorizontalOptions="Center">
+                    <Button Text="+"
+                            Command="{Binding MainBallsIncrementACommand}" />
+                    <Button Text="-"
+                            Margin="8,0,0,0"
+                            Command="{Binding MainBallsDecrementACommand}" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1"
+                                       HorizontalOptions="Center">
+                    <Button Text="+"
+                            Command="{Binding MainBallsIncrementBCommand}" />
+                    <Button Text="-"
+                            Margin="8,0,0,0"
+                            Command="{Binding MainBallsDecrementBCommand}" />
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- Случайные шары -->
+            <Label Grid.Row="5"
+                   Grid.ColumnSpan="2"
+                   Text="Случайно забитые шары"
+                   FontAttributes="Bold" />
+
+            <Grid Grid.Row="6"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Entry Grid.Column="0"
+                       HorizontalTextAlignment="Center"
+                       Keyboard="Numeric"
+                       Text="{Binding AccidentalBallsA}" />
+
+                <Entry Grid.Column="1"
+                       HorizontalTextAlignment="Center"
+                       Keyboard="Numeric"
+                       Text="{Binding AccidentalBallsB}" />
+            </Grid>
+
+            <Grid Grid.Row="7"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <HorizontalStackLayout Grid.Column="0"
+                                       HorizontalOptions="Center">
+                    <Button Text="+"
+                            Command="{Binding AccidentalBallsIncrementACommand}" />
+                    <Button Text="-"
+                            Margin="8,0,0,0"
+                            Command="{Binding AccidentalBallsDecrementACommand}" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1"
+                                       HorizontalOptions="Center">
+                    <Button Text="+"
+                            Command="{Binding AccidentalBallsIncrementBCommand}" />
+                    <Button Text="-"
+                            Margin="8,0,0,0"
+                            Command="{Binding AccidentalBallsDecrementBCommand}" />
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- Штрафы -->
+            <Label Grid.Row="8"
+                   Grid.ColumnSpan="2"
+                   Text="Штрафы"
+                   FontAttributes="Bold" />
+
+            <Grid Grid.Row="9"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Entry Grid.Column="0"
+                       HorizontalTextAlignment="Center"
+                       Keyboard="Numeric"
+                       Text="{Binding FoulsA}" />
+
+                <Entry Grid.Column="1"
+                       HorizontalTextAlignment="Center"
+                       Keyboard="Numeric"
+                       Text="{Binding FoulsB}" />
+            </Grid>
+
+            <Grid Grid.Row="10"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <HorizontalStackLayout Grid.Column="0"
+                                       HorizontalOptions="Center">
+                    <Button Text="+"
+                            Command="{Binding FoulsIncrementACommand}" />
+                    <Button Text="-"
+                            Margin="8,0,0,0"
+                            Command="{Binding FoulsDecrementACommand}" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1"
+                                       HorizontalOptions="Center">
+                    <Button Text="+"
+                            Command="{Binding FoulsIncrementBCommand}" />
+                    <Button Text="-"
+                            Margin="8,0,0,0"
+                            Command="{Binding FoulsDecrementBCommand}" />
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- Таймер -->
+            <Label Grid.Row="11"
+                   Grid.ColumnSpan="2"
+                   HorizontalOptions="Center"
+                   FontSize="36"
+                   Text="{Binding TimerText}" />
+
+            <!-- Старт/Пауза + Стоп -->
+            <Grid Grid.Row="12"
+                  Grid.ColumnSpan="2"
+                  ColumnSpacing="8"
+                  Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Text="{Binding StartPauseButtonText}"
+                        Command="{Binding StartPauseCommand}" />
+
+                <Button Grid.Column="1"
+                        Text="Стоп"
+                        Command="{Binding StopCommand}" />
+            </Grid>
+
+            <!-- Новая партия -->
+            <Button Grid.Row="13"
+                    Grid.ColumnSpan="2"
+                    Margin="0,16,0,0"
+                    HorizontalOptions="Center"
+                    WidthRequest="220"
+                    Text="Новая партия"
+                    Command="{Binding NewMatchCommand}" />
+        </Grid>
+    </ScrollView>
+</ContentView>
