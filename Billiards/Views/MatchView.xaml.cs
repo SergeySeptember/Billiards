@@ -7,6 +7,5 @@ public partial class MatchView : ContentView
     public MatchView()
     {
         InitializeComponent();
-        BindingContext = new MatchViewModel();
     }
 }

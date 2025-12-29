@@ -1,15 +1,31 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <ContentView
     x:Class="Billiards.Views.MatchView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:viewModels="clr-namespace:Billiards.ViewModels"
-    x:DataType="viewModels:MatchViewModel">
+    xmlns:viewModels="clr-namespace:Billiards.ViewModels">
+
+    <!-- Локальный инстанс MatchViewModel для этой вьюхи -->
+    <ContentView.Resources>
+        <viewModels:MatchViewModel x:Key="Vm" />
+
+        <Style x:Key="PlayerPickerStyle"
+               TargetType="Picker">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+    </ContentView.Resources>
 
     <ScrollView>
         <Grid Padding="16"
-              RowSpacing="12"
-              ColumnSpacing="8">
+              RowSpacing="6"
+              ColumnSpacing="8"
+              BindingContext="{StaticResource Vm}"
+              x:DataType="viewModels:MatchViewModel">
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <!-- 0: Тип бильярда -->
@@ -40,18 +56,28 @@
                 <RowDefinition Height="Auto" />
                 <!-- 13: Новая партия -->
             </Grid.RowDefinitions>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Тип бильярда -->
-            <Picker
-                Grid.Row="0"
-                Grid.ColumnSpan="2"
-                Title="Вид бильярда"
-                ItemsSource="{Binding GameTypes}"
-                SelectedItem="{Binding SelectedGameType}" />
+            <Picker Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    Title="Вид бильярда"
+                    Style="{StaticResource PlayerPickerStyle}"
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    SelectedItem="{Binding SelectedGameType, Mode=TwoWay}">
+                <Picker.Items>
+                    <x:String>Свободная пирамида</x:String>
+                    <x:String>Сибирская пирамида</x:String>
+                    <x:String>Московская пирамида</x:String>
+                    <x:String>Невская пирамида</x:String>
+                    <x:String>Бесконечная пирамида</x:String>
+                </Picker.Items>
+            </Picker>
 
             <!-- Имена игроков -->
             <Grid Grid.Row="1"
@@ -62,23 +88,39 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <VerticalStackLayout Grid.Column="0">
-                    <Label Text="Игрок A" />
-                    <Entry Text="{Binding PlayerAName}"
-                           IsEnabled="{Binding IsNamesEditable}" />
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="Первый игрок"
+                           HorizontalTextAlignment="Center"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Picker ItemsSource="{Binding Players}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding PlayerA, Mode=TwoWay}"
+                            IsEnabled="{Binding IsNamesEditable}"
+                            Style="{StaticResource PlayerPickerStyle}" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Grid.Column="1">
-                    <Label Text="Игрок B" />
-                    <Entry Text="{Binding PlayerBName}"
-                           IsEnabled="{Binding IsNamesEditable}" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                    <Label Text="Второй игрок"
+                           HorizontalTextAlignment="Center"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Picker ItemsSource="{Binding Players}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding PlayerB, Mode=TwoWay}"
+                            IsEnabled="{Binding IsNamesEditable}"
+                            Style="{StaticResource PlayerPickerStyle}" />
                 </VerticalStackLayout>
             </Grid>
 
-            <!-- Основные забитые шары -->
+            <!-- Забитые шары -->
             <Label Grid.Row="2"
                    Grid.ColumnSpan="2"
-                   Text="Основные забитые шары"
+                   Text="Забитые шары"
+                   FontSize="18"
+                   HorizontalTextAlignment="Center"
                    FontAttributes="Bold" />
 
             <Grid Grid.Row="3"
@@ -89,14 +131,16 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Entry Grid.Column="0"
+                <Label Grid.Column="0"
                        HorizontalTextAlignment="Center"
-                       Keyboard="Numeric"
+                       FontSize="24"
+                       FontAttributes="Bold"
                        Text="{Binding MainBallsA}" />
 
-                <Entry Grid.Column="1"
+                <Label Grid.Column="1"
                        HorizontalTextAlignment="Center"
-                       Keyboard="Numeric"
+                       FontSize="24"
+                       FontAttributes="Bold"
                        Text="{Binding MainBallsB}" />
             </Grid>
 
@@ -110,27 +154,37 @@
 
                 <HorizontalStackLayout Grid.Column="0"
                                        HorizontalOptions="Center">
-                    <Button Text="+"
+                    <Button Text=" + "
+                            FontSize="24"
+                            FontAttributes="Bold"
                             Command="{Binding MainBallsIncrementACommand}" />
-                    <Button Text="-"
-                            Margin="8,0,0,0"
+                    <Button Text=" - "
+                            FontAttributes="Bold"
+                            FontSize="28"
+                            Margin="16,0,0,0"
                             Command="{Binding MainBallsDecrementACommand}" />
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Column="1"
                                        HorizontalOptions="Center">
-                    <Button Text="+"
+                    <Button Text=" + "
+                            FontSize="24"
+                            FontAttributes="Bold"
                             Command="{Binding MainBallsIncrementBCommand}" />
-                    <Button Text="-"
-                            Margin="8,0,0,0"
+                    <Button Text=" - "
+                            FontSize="28"
+                            FontAttributes="Bold"
+                            Margin="16,0,0,0"
                             Command="{Binding MainBallsDecrementBCommand}" />
                 </HorizontalStackLayout>
             </Grid>
 
-            <!-- Случайные шары -->
+            <!-- Дураки -->
             <Label Grid.Row="5"
                    Grid.ColumnSpan="2"
-                   Text="Случайно забитые шары"
+                   Text="Дураки"
+                   HorizontalTextAlignment="Center"
+                   FontSize="18"
                    FontAttributes="Bold" />
 
             <Grid Grid.Row="6"
@@ -141,14 +195,16 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Entry Grid.Column="0"
+                <Label Grid.Column="0"
                        HorizontalTextAlignment="Center"
-                       Keyboard="Numeric"
+                       FontSize="24"
+                       FontAttributes="Bold"
                        Text="{Binding AccidentalBallsA}" />
 
-                <Entry Grid.Column="1"
+                <Label Grid.Column="1"
                        HorizontalTextAlignment="Center"
-                       Keyboard="Numeric"
+                       FontSize="24"
+                       FontAttributes="Bold"
                        Text="{Binding AccidentalBallsB}" />
             </Grid>
 
@@ -162,19 +218,27 @@
 
                 <HorizontalStackLayout Grid.Column="0"
                                        HorizontalOptions="Center">
-                    <Button Text="+"
+                    <Button Text=" + "
+                            FontSize="24"
+                            FontAttributes="Bold"
                             Command="{Binding AccidentalBallsIncrementACommand}" />
-                    <Button Text="-"
-                            Margin="8,0,0,0"
+                    <Button Text=" - "
+                            FontSize="28"
+                            FontAttributes="Bold"
+                            Margin="16,0,0,0"
                             Command="{Binding AccidentalBallsDecrementACommand}" />
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Column="1"
                                        HorizontalOptions="Center">
-                    <Button Text="+"
+                    <Button Text=" + "
+                            FontSize="24"
+                            FontAttributes="Bold"
                             Command="{Binding AccidentalBallsIncrementBCommand}" />
-                    <Button Text="-"
-                            Margin="8,0,0,0"
+                    <Button Text=" - "
+                            FontSize="28"
+                            FontAttributes="Bold"
+                            Margin="16,0,0,0"
                             Command="{Binding AccidentalBallsDecrementBCommand}" />
                 </HorizontalStackLayout>
             </Grid>
@@ -183,6 +247,8 @@
             <Label Grid.Row="8"
                    Grid.ColumnSpan="2"
                    Text="Штрафы"
+                   HorizontalTextAlignment="Center"
+                   FontSize="18"
                    FontAttributes="Bold" />
 
             <Grid Grid.Row="9"
@@ -193,14 +259,16 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Entry Grid.Column="0"
+                <Label Grid.Column="0"
                        HorizontalTextAlignment="Center"
-                       Keyboard="Numeric"
+                       FontSize="24"
+                       FontAttributes="Bold"
                        Text="{Binding FoulsA}" />
 
-                <Entry Grid.Column="1"
+                <Label Grid.Column="1"
                        HorizontalTextAlignment="Center"
-                       Keyboard="Numeric"
+                       FontSize="24"
+                       FontAttributes="Bold"
                        Text="{Binding FoulsB}" />
             </Grid>
 
@@ -214,19 +282,27 @@
 
                 <HorizontalStackLayout Grid.Column="0"
                                        HorizontalOptions="Center">
-                    <Button Text="+"
+                    <Button Text=" + "
+                            FontSize="24"
+                            FontAttributes="Bold"
                             Command="{Binding FoulsIncrementACommand}" />
-                    <Button Text="-"
-                            Margin="8,0,0,0"
+                    <Button Text=" - "
+                            FontSize="28"
+                            FontAttributes="Bold"
+                            Margin="16,0,0,0"
                             Command="{Binding FoulsDecrementACommand}" />
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Column="1"
                                        HorizontalOptions="Center">
-                    <Button Text="+"
+                    <Button Text=" + "
+                            FontSize="24"
+                            FontAttributes="Bold"
                             Command="{Binding FoulsIncrementBCommand}" />
-                    <Button Text="-"
-                            Margin="8,0,0,0"
+                    <Button Text=" - "
+                            FontSize="28"
+                            FontAttributes="Bold"
+                            Margin="16,0,0,0"
                             Command="{Binding FoulsDecrementBCommand}" />
                 </HorizontalStackLayout>
             </Grid>
@@ -249,11 +325,13 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0"
+                        FontSize="18"
                         Text="{Binding StartPauseButtonText}"
                         Command="{Binding StartPauseCommand}" />
 
                 <Button Grid.Column="1"
                         Text="Стоп"
+                        FontSize="18"
                         Command="{Binding StopCommand}" />
             </Grid>
 
@@ -264,7 +342,9 @@
                     HorizontalOptions="Center"
                     WidthRequest="220"
                     Text="Новая партия"
+                    FontSize="18"
                     Command="{Binding NewMatchCommand}" />
+
         </Grid>
     </ScrollView>
 </ContentView>

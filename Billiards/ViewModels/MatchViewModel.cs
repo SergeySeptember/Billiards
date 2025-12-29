@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Billiards.Core;
+using Billiards.Core.Entities.DB;
 
 namespace Billiards.ViewModels;
 
@@ -14,14 +10,30 @@ public class MatchViewModel : BaseViewModel
     private readonly MatchTimer _matchTimer = new();
     private readonly IDispatcherTimer _uiTimer;
 
-    public ObservableCollection<string> GameTypes { get; } =
+    // ----- Виды бильярда -----
+    public ObservableCollection<object> GameTypes { get; } =
+    [
+        "Свободная пирамида",
+        "Сибирская пирамида",
+        "Московская пирамида",
+        "Невская пирамида",
+        "Бесконечная пирамида"
+    ];
+
+    public ObservableCollection<Player> Players { get; set; } =
         new()
         {
-            "Свободная пирамида",
-            "Московская пирамида",
-            "Сибирская пирамида",
-            "Бесконечная пирамида"
+            new Player { Name = "Мешков Сергей" },
+            new Player { Name = "Ахмедулин Сергей" },
+            new Player { Name = "Игрок 3" }
         };
+
+    private bool _isNamesEditable = true;
+    public bool IsNamesEditable
+    {
+        get => _isNamesEditable;
+        set => SetProperty(ref _isNamesEditable, value);
+    }
 
     private string _selectedGameType;
 
@@ -31,79 +43,71 @@ public class MatchViewModel : BaseViewModel
         set => SetProperty(ref _selectedGameType, value);
     }
 
-    private string _playerAName = "Игрок A";
-
-    public string PlayerAName
+    // ----- Имена игроков -----
+    private Player? _playerA;
+    public Player? PlayerA
     {
-        get => _playerAName;
-        set => SetProperty(ref _playerAName, value);
+        get => _playerA;
+        set => SetProperty(ref _playerA, value);
     }
 
-    private string _playerBName = "Игрок B";
-
-    public string PlayerBName
+    private Player? _playerB;
+    public Player? PlayerB
     {
-        get => _playerBName;
-        set => SetProperty(ref _playerBName, value);
+        get => _playerB;
+        set => SetProperty(ref _playerB, value);
     }
 
-    private bool _isNamesEditable = true;
+    // ----- Счётчики -----
+    private int _mainBallsA = 0;
 
-    public bool IsNamesEditable
-    {
-        get => _isNamesEditable;
-        set => SetProperty(ref _isNamesEditable, value);
-    }
-
-    // Счётчики как строки, чтобы нормально парсить +/-
-    private string _mainBallsA = "0";
-
-    public string MainBallsA
+    public int MainBallsA
     {
         get => _mainBallsA;
         set => SetProperty(ref _mainBallsA, value);
     }
 
-    private string _mainBallsB = "0";
+    private int _mainBallsB = 0;
 
-    public string MainBallsB
+    public int MainBallsB
     {
         get => _mainBallsB;
         set => SetProperty(ref _mainBallsB, value);
     }
 
-    private string _accidentalBallsA = "0";
+    private int _accidentalBallsA = 0;
 
-    public string AccidentalBallsA
+    public int AccidentalBallsA
     {
         get => _accidentalBallsA;
         set => SetProperty(ref _accidentalBallsA, value);
     }
 
-    private string _accidentalBallsB = "0";
+    private int _accidentalBallsB = 0;
 
-    public string AccidentalBallsB
+    public int AccidentalBallsB
     {
         get => _accidentalBallsB;
         set => SetProperty(ref _accidentalBallsB, value);
     }
 
-    private string _foulsA = "0";
+    private int _foulsA = 0;
 
-    public string FoulsA
+    public int FoulsA
     {
         get => _foulsA;
         set => SetProperty(ref _foulsA, value);
     }
 
-    private string _foulsB = "0";
+    private int _foulsB = 0;
 
-    public string FoulsB
+    public int FoulsB
     {
         get => _foulsB;
         set => SetProperty(ref _foulsB, value);
     }
 
+    // ----- Таймер -----
     private string _timerText = "00:00:00";
 
     public string TimerText
@@ -112,7 +116,6 @@ public class MatchViewModel : BaseViewModel
         set => SetProperty(ref _timerText, value);
     }
 
-    // Текст кнопки Старт/Пауза/Продолжить
     public string StartPauseButtonText =>
         !_matchTimer.IsRunning
             ? "Старт"
@@ -120,7 +123,8 @@ public class MatchViewModel : BaseViewModel
                 ? "Продолжить"
                 : "Пауза";
 
-    // Команды
+    // ----- Команды -----
+
     public ICommand StartPauseCommand { get; }
     public ICommand StopCommand { get; }
     public ICommand NewMatchCommand { get; }
@@ -142,10 +146,9 @@ public class MatchViewModel : BaseViewModel
 
     public MatchViewModel()
     {
-        _selectedGameType = GameTypes.First();
+        _selectedGameType = GameTypes.First().ToString()!;
 
-        var dispatcher = Application.Current?.Dispatcher
-                         ?? throw new InvalidOperationException("Dispatcher not available");
+        var dispatcher = Application.Current?.Dispatcher ?? throw new InvalidOperationException("Dispatcher not available");
 
         _uiTimer = dispatcher.CreateTimer();
         _uiTimer.Interval = TimeSpan.FromSeconds(1);
@@ -153,53 +156,141 @@ public class MatchViewModel : BaseViewModel
 
         StartPauseCommand = new Command(OnStartPause);
         StopCommand = new Command(OnStop);
-        NewMatchCommand = new Command(OnNewMatch);
+        NewMatchCommand = new Command(async () => await OnNewMatchAsync());
 
-        MainBallsIncrementACommand = new Command(() => MainBallsA = ChangeInt(MainBallsA, +1));
-        MainBallsDecrementACommand = new Command(() => MainBallsA = ChangeInt(MainBallsA, -1));
-        MainBallsIncrementBCommand = new Command(() => MainBallsB = ChangeInt(MainBallsB, +1));
-        MainBallsDecrementBCommand = new Command(() => MainBallsB = ChangeInt(MainBallsB, -1));
+        // Забитые шары
+        MainBallsIncrementACommand = new Command(() => MainBallsA++);
+        MainBallsDecrementACommand = new Command(() => MainBallsA--);
+        MainBallsIncrementBCommand = new Command(() => MainBallsB++);
+        MainBallsDecrementBCommand = new Command(() => MainBallsB--);
 
-        AccidentalBallsIncrementACommand = new Command(() => AccidentalBallsA = ChangeInt(AccidentalBallsA, +1));
-        AccidentalBallsDecrementACommand = new Command(() => AccidentalBallsA = ChangeInt(AccidentalBallsA, -1));
-        AccidentalBallsIncrementBCommand = new Command(() => AccidentalBallsB = ChangeInt(AccidentalBallsB, +1));
-        AccidentalBallsDecrementBCommand = new Command(() => AccidentalBallsB = ChangeInt(AccidentalBallsB, -1));
+        // Дураки
+        AccidentalBallsIncrementACommand = new Command(() => AccidentalBallsA++);
+        AccidentalBallsDecrementACommand = new Command(() => AccidentalBallsA--);
+        AccidentalBallsIncrementBCommand = new Command(() => AccidentalBallsB++);
+        AccidentalBallsDecrementBCommand = new Command(() => AccidentalBallsB--);
 
-        FoulsIncrementACommand = new Command(() => FoulsA = ChangeInt(FoulsA, +1));
-        FoulsDecrementACommand = new Command(() => FoulsA = ChangeInt(FoulsA, -1));
-        FoulsIncrementBCommand = new Command(() => FoulsB = ChangeInt(FoulsB, +1));
-        FoulsDecrementBCommand = new Command(() => FoulsB = ChangeInt(FoulsB, -1));
+        // Штрафы
+        FoulsIncrementACommand = new Command(() => FoulsA++);
+        FoulsDecrementACommand = new Command(() => FoulsA--);
+        FoulsIncrementBCommand = new Command(() => FoulsB++);
+        FoulsDecrementBCommand = new Command(() => FoulsB--);
     }
 
-    private static string ChangeInt(string current, int delta)
+    private void GetPlayersName()
     {
-        if (!int.TryParse(current, out var value))
+        // здесь из БД получаем имена игроков
+        // времено так
+
+    }
+
+    private async Task OnNewMatchAsync()
+    {
+        OnStop();
+
+        var hasActivity = TimerText != "00:00:00";
+        if (hasActivity)
         {
-            value = 0;
+            var page = GetCurrentPage();
+            if (page is not null)
+            {
+                var save = await page.DisplayAlert(
+                    title: "Новая партия",
+                    message: "Сохранить статистику текущей партии перед началом новой?",
+                    accept: "Сохранить",
+                    cancel: "Не сохранять");
+
+                if (save)
+                {
+                    var matchStats = new MatchStats()
+                    {
+                        CurrentDateTime = DateTime.Now,
+                        MatchTime = TimerText,
+                        GameTypes = _selectedGameType
+                    };
+                    if (MainBallsA >= 8)
+                    {
+                        matchStats.WinnerPlayer = PlayerA?.Name;
+                        matchStats.BallsWinnerPlayer = MainBallsA;
+                        matchStats.AccidentalBallsWinnerPlayer = AccidentalBallsA;
+                        matchStats.FoulsBallsWinnerPlayer = FoulsA;
+
+                        matchStats.LosePlayer = PlayerB?.Name;
+                        matchStats.BallsLosePlayer = MainBallsB;
+                        matchStats.AccidentalBallsLosePlayer = AccidentalBallsB;
+                        matchStats.FoulsBallsLosePlayer = FoulsB;
+                    }
+                    else if (MainBallsB >= 8)
+                    {
+                        matchStats.WinnerPlayer = PlayerB?.Name;
+                        matchStats.BallsWinnerPlayer = MainBallsB;
+                        matchStats.AccidentalBallsWinnerPlayer = AccidentalBallsB;
+                        matchStats.FoulsBallsWinnerPlayer = FoulsB;
+
+                        matchStats.LosePlayer = PlayerA?.Name;
+                        matchStats.BallsLosePlayer = MainBallsA;
+                        matchStats.AccidentalBallsLosePlayer = AccidentalBallsA;
+                        matchStats.FoulsBallsLosePlayer = FoulsA;
+                    }
+                    else
+                    {
+                        _ = page.DisplayAlert("Ошибка", "Что то не так!", "Ладно...");
+                    }
+                }
+            }
         }
 
-        value += delta;
-        return value.ToString();
+        ResetMatchState();
+    }
+
+    private void ResetMatchState()
+    {
+        _matchTimer.Reset();
+        _uiTimer.Stop();
+
+        TimerText = "00:00:00";
+        IsNamesEditable = true;
+
+        MainBallsA = 0;
+        MainBallsB = 0;
+        AccidentalBallsA = 0;
+        AccidentalBallsB = 0;
+        FoulsA = 0;
+        FoulsB = 0;
+
+        OnPropertyChanged(nameof(StartPauseButtonText));
     }
 
     private void OnStartPause()
     {
         if (!_matchTimer.IsRunning)
         {
-            // Первый старт
+            var page = GetCurrentPage();
+            if (string.IsNullOrEmpty(_playerA?.Name) || string.IsNullOrEmpty(_playerB?.Name))
+            {
+                _ = page?.DisplayAlert("Ошибка", "Выберите игроков!", "Ок");
+                return;
+            }
+            if (_playerA.Name == _playerB.Name)
+            {
+                _ = page?.DisplayAlert("Ошибка", "Выберите разных игроков!", "Ок");
+                return;
+            }
+
+            // первый старт
             _matchTimer.Start();
             IsNamesEditable = false;
             _uiTimer.Start();
         }
         else if (_matchTimer.IsPaused)
         {
-            // Продолжить
+            // продолжить
             _matchTimer.Resume();
             _uiTimer.Start();
         }
         else
         {
-            // Пауза
+            // пауза
             _matchTimer.Pause();
             _uiTimer.Stop();
         }
@@ -214,33 +305,19 @@ public class MatchViewModel : BaseViewModel
         _uiTimer.Stop();
         UpdateTimerText();
         OnPropertyChanged(nameof(StartPauseButtonText));
-
-        // TODO: здесь позже спросим "Сохранить партию?"
-        // и вызовем сервис сохранения матча.
-    }
-
-    private void OnNewMatch()
-    {
-        _matchTimer.Reset();
-        _uiTimer.Stop();
-
-        TimerText = "00:00:00";
-        IsNamesEditable = true;
-
-        MainBallsA = "0";
-        MainBallsB = "0";
-        AccidentalBallsA = "0";
-        AccidentalBallsB = "0";
-        FoulsA = "0";
-        FoulsB = "0";
-
-        // Имена игроков можно оставлять прежними или очищать — на твой вкус.
-        OnPropertyChanged(nameof(StartPauseButtonText));
     }
 
     private void UpdateTimerText()
     {
         var elapsed = _matchTimer.GetElapsed(DateTime.UtcNow);
         TimerText = $"{(int)elapsed.TotalHours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+    }
+
+    private static Page? GetCurrentPage()
+    {
+        if (Shell.Current?.CurrentPage is { } shellPage)
+            return shellPage;
+
+        return Application.Current?.Windows.FirstOrDefault()?.Page;
     }
 }

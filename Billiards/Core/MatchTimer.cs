@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Billiards.Core;
+﻿namespace Billiards.Core;
 
 public class MatchTimer
 {
@@ -30,9 +24,7 @@ public class MatchTimer
     public void Pause()
     {
         if (!IsRunning || IsPaused || _startUtc is null)
-        {
             return;
-        }
 
         _pauseStartUtc = DateTime.UtcNow;
         IsPaused = true;
@@ -41,9 +33,7 @@ public class MatchTimer
     public void Resume()
     {
         if (!IsRunning || !IsPaused || _startUtc is null || _pauseStartUtc is null)
-        {
             return;
-        }
 
         var now = DateTime.UtcNow;
         _totalPaused += now - _pauseStartUtc.Value;
@@ -78,14 +68,10 @@ public class MatchTimer
     public TimeSpan GetElapsed(DateTime nowUtc)
     {
         if (_startUtc is null)
-        {
-            return _elapsedAtStop; // до старта или после сброса — 0
-        }
+            return _elapsedAtStop;
 
         if (!IsRunning)
-        {
             return _elapsedAtStop;
-        }
 
         return GetElapsedInternal(nowUtc);
     }
@@ -93,23 +79,16 @@ public class MatchTimer
     private TimeSpan GetElapsedInternal(DateTime nowUtc)
     {
         if (_startUtc is null)
-        {
             return TimeSpan.Zero;
-        }
 
         var effectiveNow = nowUtc;
 
-        // если на паузе — время замирает на момент начала паузы
         if (IsPaused && _pauseStartUtc.HasValue)
-        {
             effectiveNow = _pauseStartUtc.Value;
-        }
 
         var elapsed = effectiveNow - _startUtc.Value - _totalPaused;
         if (elapsed < TimeSpan.Zero)
-        {
             elapsed = TimeSpan.Zero;
-        }
 
         return elapsed;
     }
