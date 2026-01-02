@@ -2,6 +2,7 @@
 
 public class Player
 {
+    public int Id { get; set; }
     public string Name { get; set; } = null!;
 }
 
@@ -17,6 +18,7 @@ public class PlayerStats : Player
 
 public class MatchStats
 {
+    public long Id { get; set; }
     public DateTime CurrentDateTime { get; set; }
     public string GameTypes { get; set; } = null!;
     public string WinnerPlayer { get; set; } = null!;

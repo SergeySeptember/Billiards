@@ -1,27 +1,46 @@
-﻿using CommunityToolkit.Maui;
+﻿using Billiards.Data;
+using Billiards.Data.Repositories;
+using CommunityToolkit.Maui;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Billiards
+namespace Billiards;
+
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
-        {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
-            builder.UseMauiCommunityToolkit();
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
+        builder.UseMauiCommunityToolkit();
+
+        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "billiards.db");
+        var connectionString = $"Data Source={dbPath}";
+
+        builder.Services.AddDbContextFactory<BilliardsDbContext>(options =>
+            options.UseSqlite(connectionString));
+
+        builder.Services.AddSingleton<IPlayerRepository, EfPlayerRepository>();
+        builder.Services.AddSingleton<IMatchStatsRepository, EfMatchStatsRepository>();
+
 
 #if DEBUG
-            builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
-        }
+        var app = builder.Build();
+
+        using var scope = app.Services.CreateScope();
+        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<BilliardsDbContext>>();
+        using var db = factory.CreateDbContext();
+        db.Database.EnsureCreated();
+
+        return app;
     }
 }
