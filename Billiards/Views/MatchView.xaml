@@ -8,8 +8,6 @@
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
     <ContentView.Resources>
-        <viewModels:MatchViewModel x:Key="Vm" />
-
         <Style x:Key="PlayerPickerStyle" TargetType="Picker">
             <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="FontSize" Value="16" />
@@ -35,30 +33,29 @@
               Padding="16"
               RowSpacing="6"
               ColumnSpacing="6"
-              BindingContext="{StaticResource Vm}"
               x:DataType="viewModels:MatchViewModel">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <!-- 0: Тип -->
+                <!-- 0: Тип бильярда -->
                 <RowDefinition Height="Auto" />
                 <!-- 1: Игроки -->
                 <RowDefinition Height="Auto" />
                 <!-- 2: Разбивает -->
                 <RowDefinition Height="Auto" />
-                <!-- 3: Заголовок: Забитые -->
+                <!-- 3: Заголовок: забитые -->
                 <RowDefinition Height="Auto" />
                 <!-- 4: Забитые: значения -->
                 <RowDefinition Height="Auto" />
                 <!-- 5: Забитые: кнопки -->
                 <RowDefinition Height="Auto" />
-                <!-- 6: Заголовок: Дураки -->
+                <!-- 6: Заголовок: дураки -->
                 <RowDefinition Height="Auto" />
                 <!-- 7: Дураки: значения -->
                 <RowDefinition Height="Auto" />
                 <!-- 8: Дураки: кнопки -->
                 <RowDefinition Height="Auto" />
-                <!-- 9: Заголовок: Штрафы -->
+                <!-- 9: Заголовок: штрафы -->
                 <RowDefinition Height="Auto" />
                 <!-- 10: Штрафы: значения -->
                 <RowDefinition Height="Auto" />
@@ -66,9 +63,7 @@
                 <RowDefinition Height="Auto" />
                 <!-- 12: Таймер -->
                 <RowDefinition Height="Auto" />
-                <!-- 13: Старт/Стоп -->
-                <RowDefinition Height="Auto" />
-                <!-- 14: Новая партия -->
+                <!-- 13: Кнопки (Старт/Стоп + Новая партия) -->
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -83,7 +78,7 @@
                     Style="{StaticResource PlayerPickerStyle}"
                     FontSize="18"
                     SelectedItem="{Binding SelectedGameType, Mode=TwoWay}"
-                    IsEnabled="{Binding IsNamesEditable}">
+                    IsEnabled="{Binding IsEditable}">
                 <Picker.Items>
                     <x:String>Свободная пирамида</x:String>
                     <x:String>Сибирская пирамида</x:String>
@@ -112,10 +107,9 @@
                             Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
                             StrokeShape="RoundRectangle 14">
 
-                        <!-- LongPress включаем ТОЛЬКО когда имена уже заморожены -->
                         <Border.Behaviors>
                             <toolkit:TouchBehavior
-                                IsEnabled="{Binding BindingContext.IsBreakGestureEnabled, Source={x:Reference Root}}"
+                                IsEnabled="True"
                                 ShouldMakeChildrenInputTransparent="False"
                                 LongPressDuration="650"
                                 PressedScale="0.98"
@@ -132,7 +126,7 @@
                             <Picker ItemsSource="{Binding Players}"
                                     ItemDisplayBinding="{Binding Name}"
                                     SelectedItem="{Binding PlayerA, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsNamesEditable}"
+                                    IsEnabled="{Binding IsEditable}"
                                     Style="{StaticResource PlayerPickerStyle}" />
 
                             <Border Padding="6,2"
@@ -174,7 +168,7 @@
 
                         <Border.Behaviors>
                             <toolkit:TouchBehavior
-                                IsEnabled="{Binding BindingContext.IsBreakGestureEnabled, Source={x:Reference Root}}"
+                                IsEnabled="True"
                                 ShouldMakeChildrenInputTransparent="False"
                                 LongPressDuration="650"
                                 PressedScale="0.98"
@@ -191,7 +185,7 @@
                             <Picker ItemsSource="{Binding Players}"
                                     ItemDisplayBinding="{Binding Name}"
                                     SelectedItem="{Binding PlayerB, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsNamesEditable}"
+                                    IsEnabled="{Binding IsEditable}"
                                     Style="{StaticResource PlayerPickerStyle}" />
 
                             <Border Padding="6,2"
@@ -241,7 +235,7 @@
                         ItemsSource="{Binding BreakerCandidates}"
                         ItemDisplayBinding="{Binding Name}"
                         SelectedItem="{Binding BreakerPlayer, Mode=TwoWay}"
-                        IsEnabled="{Binding IsNamesEditable}"
+                        IsEnabled="{Binding IsEditable}"
                         Style="{StaticResource PlayerPickerStyle}" />
             </Grid>
 
@@ -361,11 +355,11 @@
                    FontSize="36"
                    Text="{Binding TimerText}" />
 
-            <!-- Старт/Пауза + Стоп -->
+            <!-- Кнопки: Старт/Стоп + Новая партия -->
             <Grid Grid.Row="13"
                   Grid.ColumnSpan="2"
                   ColumnSpacing="8"
-                  Margin="0,8,0,0">
+                  Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -373,24 +367,14 @@
 
                 <Button Grid.Column="0"
                         FontSize="18"
-                        Text="{Binding StartPauseButtonText}"
-                        Command="{Binding StartPauseCommand}" />
+                        Text="{Binding StartStopButtonText}"
+                        Command="{Binding StartStopCommand}" />
 
                 <Button Grid.Column="1"
-                        Text="Стоп"
                         FontSize="18"
-                        Command="{Binding StopCommand}" />
+                        Text="Новая партия"
+                        Command="{Binding NewMatchCommand}" />
             </Grid>
-
-            <!-- Новая партия -->
-            <Button Grid.Row="14"
-                    Grid.ColumnSpan="2"
-                    Margin="0,16,0,0"
-                    HorizontalOptions="Center"
-                    WidthRequest="220"
-                    Text="Новая партия"
-                    FontSize="18"
-                    Command="{Binding NewMatchCommand}" />
 
         </Grid>
     </ScrollView>

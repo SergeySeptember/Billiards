@@ -2,15 +2,16 @@
 using System.Windows.Input;
 using Billiards.Core;
 using Billiards.Core.Entities.DB;
-using Microsoft.Maui.Storage;
+using Billiards.Data.Repositories;
 
 namespace Billiards.ViewModels;
 
 public class MatchViewModel : BaseViewModel
 {
+    private readonly IMatchStatsRepository _matchRepository;
+    private readonly IPlayerRepository _playerRepository;
     private readonly MatchTimer _matchTimer = new();
     private readonly IDispatcherTimer _uiTimer;
-    private const string PrefLastMatchDateKey = "last_match_date";
 
     // ----- Виды бильярда -----
     public ObservableCollection<string> GameTypes { get; } = new()
@@ -22,28 +23,13 @@ public class MatchViewModel : BaseViewModel
         "Бесконечная пирамида"
     };
 
-    public ObservableCollection<Player> Players { get; } = new()
-    {
-        new() { Name = "Мешков Сергей" },
-        new() { Name = "Ахмедулин Сергей" }
-    };
+    private bool _isEditable = true;
 
-    private bool _isNamesEditable = true;
-
-    public bool IsNamesEditable
+    public bool IsEditable
     {
-        get => _isNamesEditable;
-        set
-        {
-            if (SetProperty(ref _isNamesEditable, value))
-            {
-                OnPropertyChanged(nameof(IsBreakGestureEnabled));
-            }
-        }
+        get => _isEditable;
+        set => SetProperty(ref _isEditable, value);
     }
-
-    // LongPress включаем только когда имена “заморожены”
-    public bool IsBreakGestureEnabled => !IsNamesEditable;
 
     private string _selectedGameType;
 
@@ -54,6 +40,8 @@ public class MatchViewModel : BaseViewModel
     }
 
     // ----- Игроки -----
+    public ObservableCollection<Player> Players { get; } = new();
+
     private Player? _playerA;
 
     public Player? PlayerA
@@ -64,7 +52,6 @@ public class MatchViewModel : BaseViewModel
             if (SetProperty(ref _playerA, value))
             {
                 RefreshBreakerCandidates();
-                NormalizeBreakShot();
             }
         }
     }
@@ -79,12 +66,10 @@ public class MatchViewModel : BaseViewModel
             if (SetProperty(ref _playerB, value))
             {
                 RefreshBreakerCandidates();
-                NormalizeBreakShot();
             }
         }
     }
 
-    // ----- Разбой: кто разбивает пирамиду -----
     public ObservableCollection<Player> BreakerCandidates { get; } = new();
 
     private Player? _breakerPlayer;
@@ -95,7 +80,6 @@ public class MatchViewModel : BaseViewModel
         set => SetProperty(ref _breakerPlayer, value);
     }
 
-    // ----- “Забил с разбоя” (визуальный эффект + запись в MatchStats.BreakShotPlayer) -----
     private string? _breakShotPlayerName;
 
     public string? BreakShotPlayerName
@@ -172,16 +156,15 @@ public class MatchViewModel : BaseViewModel
         set => SetProperty(ref _timerText, value);
     }
 
-    public string StartPauseButtonText =>
+    public string StartStopButtonText =>
         !_matchTimer.IsRunning
             ? "Старт"
             : _matchTimer.IsPaused
                 ? "Продолжить"
-                : "Пауза";
+                : "Стоп";
 
     // ----- Команды -----
-    public ICommand StartPauseCommand { get; }
-    public ICommand StopCommand { get; }
+    public ICommand StartStopCommand { get; }
     public ICommand NewMatchCommand { get; }
 
     public ICommand MainBallsIncrementACommand { get; }
@@ -202,19 +185,18 @@ public class MatchViewModel : BaseViewModel
     public ICommand ToggleBreakShotCommand { get; }
     public ICommand ClearBreakShotCommand { get; }
 
-    public MatchViewModel()
+    public MatchViewModel(IMatchStatsRepository matchRepository, IPlayerRepository playerRepository, IDispatcher dispatcher)
     {
-        _selectedGameType = GameTypes.First();
+        _matchRepository = matchRepository;
+        _playerRepository = playerRepository;
 
-        var dispatcher = Application.Current?.Dispatcher
-                         ?? throw new InvalidOperationException("Dispatcher not available");
+        _selectedGameType = GameTypes.First();
 
         _uiTimer = dispatcher.CreateTimer();
         _uiTimer.Interval = TimeSpan.FromSeconds(1);
         _uiTimer.Tick += (_, _) => UpdateTimerText();
 
-        StartPauseCommand = new Command(async () => await StartPauseAsync());
-        StopCommand = new Command(Stop);
+        StartStopCommand = new Command(StartStop);
         NewMatchCommand = new Command(async () => await NewMatchAsync());
 
         ToggleBreakShotCommand = new Command<Player?>(ToggleBreakShot);
@@ -235,79 +217,71 @@ public class MatchViewModel : BaseViewModel
         FoulsIncrementBCommand = new Command(() => FoulsB++);
         FoulsDecrementBCommand = new Command(() => FoulsB--);
 
-        // на старте — кандидаты пустые, заполнятся когда выберешь игроков
-        RefreshBreakerCandidates();
+        _ = LoadPlayersAsync();
     }
 
-    private async Task StartPauseAsync()
+    private void StartStop()
     {
+        var page = GetCurrentPage();
+
         if (!_matchTimer.IsRunning)
         {
-            BreakShotPlayerName = null;
-            var page = GetCurrentPage();
-
-            if (PlayerA is null || PlayerB is null)
+            if (!ValidatePlayers(page))
             {
-                _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
                 return;
             }
-
-            if (PlayerA.Name == PlayerB.Name)
-            {
-                _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
-                return;
-            }
-
-            RefreshBreakerCandidates();
-            
-            if (!IsFirstMatchToday())
-            {
-                var a = BreakerCandidates[0].Name;
-                var b = BreakerCandidates[1].Name;
-
-                var choice = await page.DisplayActionSheet(
-                    "Кто разбивает пирамиду?",
-                    "Отмена",
-                    null,
-                    a, b);
-
-                if (choice == "Отмена")
-                {
-                    return;
-                }
-
-                BreakerPlayer = BreakerCandidates.FirstOrDefault(p => p.Name == choice);
-            }
-            else
-            {
-                BreakerPlayer ??= BreakerCandidates.FirstOrDefault();
-            }
-
-            // фиксируем “сегодня уже была партия” именно на старте
-            MarkMatchHappenedToday();
 
             _matchTimer.Start();
-            IsNamesEditable = false;
-
             _uiTimer.Start();
             UpdateTimerText();
-            OnPropertyChanged(nameof(StartPauseButtonText));
+
+            IsEditable = false;
+
+            OnPropertyChanged(nameof(StartStopButtonText));
             return;
         }
 
-        if (_matchTimer.IsPaused)
-        {
-            _matchTimer.Resume();
-            _uiTimer.Start();
-        }
-        else
+        if (!_matchTimer.IsPaused)
         {
             _matchTimer.Pause();
             _uiTimer.Stop();
+            UpdateTimerText();
+
+            IsEditable = true;
+
+            OnPropertyChanged(nameof(StartStopButtonText));
+            return;
         }
 
+        if (!ValidatePlayers(page))
+        {
+            return;
+        }
+
+        _matchTimer.Resume();
+        _uiTimer.Start();
         UpdateTimerText();
-        OnPropertyChanged(nameof(StartPauseButtonText));
+
+        IsEditable = false;
+
+        OnPropertyChanged(nameof(StartStopButtonText));
+    }
+
+    private bool ValidatePlayers(Page page)
+    {
+        if (PlayerA is null || PlayerB is null)
+        {
+            _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
+            return false;
+        }
+
+        if (PlayerA.Name == PlayerB.Name)
+        {
+            _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
+            return false;
+        }
+
+        return true;
     }
 
     private void Stop()
@@ -316,9 +290,9 @@ public class MatchViewModel : BaseViewModel
         _uiTimer.Stop();
         UpdateTimerText();
 
-        IsNamesEditable = true;
+        IsEditable = true;
 
-        OnPropertyChanged(nameof(StartPauseButtonText));
+        OnPropertyChanged(nameof(StartStopButtonText));
     }
 
     private async Task NewMatchAsync()
@@ -328,7 +302,7 @@ public class MatchViewModel : BaseViewModel
         var page = GetCurrentPage();
         var hasActivity = TimerText != "00:00:00";
 
-        if (hasActivity && page is not null)
+        if (hasActivity)
         {
             var save = await page.DisplayAlert(
                 "Новая партия",
@@ -338,23 +312,44 @@ public class MatchViewModel : BaseViewModel
 
             if (save)
             {
-                var ok = await TryBuildAndSaveMatchAsync();
+                var ok = await SaveMatchAsync();
                 if (!ok)
                 {
-                    // если не сохранилось — не начинаем новую, чтобы не потерять данные
                     return;
                 }
             }
-
-            // по требованию: каждый новый матч — меняем разбивающего
-            ToggleBreakerForNextMatch();
-            BreakShotPlayerName = null;
         }
 
-        ResetMatchState();
+        // Сбрасываем результат партии
+        if (PlayerA is null || PlayerB is null)
+        {
+            return;
+        }
+        if (BreakerPlayer is null)
+        {
+            BreakerPlayer = PlayerA;
+            return;
+        }
+        BreakerPlayer = BreakerPlayer.Name == PlayerA.Name ? PlayerB : PlayerA;
+
+        _matchTimer.Reset();
+        _uiTimer.Stop();
+        TimerText = "00:00:00";
+
+        IsEditable = true;
+
+        MainBallsA = 0;
+        MainBallsB = 0;
+        AccidentalBallsA = 0;
+        AccidentalBallsB = 0;
+        FoulsA = 0;
+        FoulsB = 0;
+        BreakShotPlayerName = null;
+
+        OnPropertyChanged(nameof(StartStopButtonText));
     }
 
-    private async Task<bool> TryBuildAndSaveMatchAsync()
+    private async Task<bool> SaveMatchAsync()
     {
         var page = GetCurrentPage();
         MatchStats matchStats = new()
@@ -395,35 +390,12 @@ public class MatchViewModel : BaseViewModel
         }
         else
         {
-            _ = page.DisplayAlert("Не сохраняю", $"Победитель не определён (нужно 8+ шаров).", "Ок");
+            _ = page.DisplayAlert("Не сохранено", "Победитель не определён (нужно 8+ шаров).", "Ок");
             return false;
         }
 
-        // TODO: здесь будет сохранение в БД
-        // await _matchRepository.AddAsync(matchStats);
-        // Пока заглушка:
-        await Task.CompletedTask;
-
+        await _matchRepository.AddAsync(matchStats);
         return true;
-    }
-
-    private void ResetMatchState()
-    {
-        _matchTimer.Reset();
-        _uiTimer.Stop();
-
-        TimerText = "00:00:00";
-        IsNamesEditable = true;
-
-        MainBallsA = 0;
-        MainBallsB = 0;
-        AccidentalBallsA = 0;
-        AccidentalBallsB = 0;
-        FoulsA = 0;
-        FoulsB = 0;
-        BreakShotPlayerName = null;
-
-        OnPropertyChanged(nameof(StartPauseButtonText));
     }
 
     private void UpdateTimerText()
@@ -442,29 +414,6 @@ public class MatchViewModel : BaseViewModel
         BreakShotPlayerName = BreakShotPlayerName == player.Name ? null : player.Name;
     }
 
-    private void NormalizeBreakShot()
-    {
-        if (BreakShotPlayerName is null)
-        {
-            OnPropertyChanged(nameof(IsBreakShotA));
-            OnPropertyChanged(nameof(IsBreakShotB));
-            return;
-        }
-
-        var a = PlayerA?.Name;
-        var b = PlayerB?.Name;
-
-        if (BreakShotPlayerName != a && BreakShotPlayerName != b)
-        {
-            BreakShotPlayerName = null;
-        }
-        else
-        {
-            OnPropertyChanged(nameof(IsBreakShotA));
-            OnPropertyChanged(nameof(IsBreakShotB));
-        }
-    }
-
     private void RefreshBreakerCandidates()
     {
         BreakerCandidates.Clear();
@@ -478,40 +427,6 @@ public class MatchViewModel : BaseViewModel
         {
             BreakerCandidates.Add(PlayerB);
         }
-
-        if (BreakerPlayer is null || !BreakerCandidates.Contains(BreakerPlayer))
-        {
-            BreakerPlayer = BreakerCandidates.FirstOrDefault();
-        }
-    }
-
-    private void ToggleBreakerForNextMatch()
-    {
-        if (PlayerA is null || PlayerB is null)
-        {
-            return;
-        }
-
-        if (BreakerPlayer is null)
-        {
-            BreakerPlayer = PlayerA;
-            return;
-        }
-
-        BreakerPlayer = BreakerPlayer.Name == PlayerA.Name ? PlayerB : PlayerA;
-    }
-
-    private static bool IsFirstMatchToday()
-    {
-        // Todo: брать данные из БД
-        var last = Preferences.Default.Get(PrefLastMatchDateKey, "");
-        var today = DateTime.Today.ToString("yyyy-MM-dd");
-        return last != today;
-    }
-
-    private static void MarkMatchHappenedToday()
-    {
-        Preferences.Default.Set(PrefLastMatchDateKey, DateTime.Today.ToString("yyyy-MM-dd"));
     }
 
     private static Page GetCurrentPage()
@@ -522,5 +437,22 @@ public class MatchViewModel : BaseViewModel
         }
 
         return Application.Current?.Windows.FirstOrDefault()?.Page;
+    }
+
+    private async Task LoadPlayersAsync()
+    {
+        try
+        {
+            var players = await _playerRepository.GetAllAsync();
+            Players.Clear();
+            foreach (var player in players)
+            {
+                Players.Add(player);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to load players: {ex}");
+        }
     }
 }

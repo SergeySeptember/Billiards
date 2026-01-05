@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <ContentPage
     x:Class="Billiards.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -11,7 +10,6 @@
     <ContentPage.Resources>
         <ResourceDictionary>
 
-            <!-- Шаблоны для трёх страниц -->
             <DataTemplate x:Key="SettingsTemplate">
                 <views:SettingsView />
             </DataTemplate>
@@ -24,7 +22,6 @@
                 <views:StatsView />
             </DataTemplate>
 
-            <!-- TemplateSelector для карусели -->
             <views:MainCarouselTemplateSelector x:Key="MainCarouselTemplateSelector"
                                                 SettingsTemplate="{StaticResource SettingsTemplate}"
                                                 MatchTemplate="{StaticResource MatchTemplate}"
@@ -32,29 +29,8 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-
-    <Grid RowDefinitions="Auto,*">
-
-        <!-- Карусель + индикаторы -->
-        <Grid Grid.Row="1" RowDefinitions="*,Auto">
-
-            <CarouselView x:Name="MainCarousel"
-                          Grid.Row="0"
-                          ItemsSource="{Binding Pages}"
-                          Position="{Binding CurrentIndex}"
-                          ItemTemplate="{StaticResource MainCarouselTemplateSelector}" />
-
-            <IndicatorView
-                Grid.Row="1"
-                Margin="0,8,0,16"
-                HorizontalOptions="Center"
-                IndicatorColor="Gray"
-                SelectedIndicatorColor="{DynamicResource Primary}"
-                IndicatorsShape="Circle"
-                Count="3"
-                Position="{Binding Source={x:Reference MainCarousel},
-                               Path=Position}" />
-        </Grid>
-    </Grid>
-
+    <CarouselView ItemsSource="{Binding Pages}"
+                  ItemTemplate="{StaticResource MainCarouselTemplateSelector}"
+                  Position="{Binding CurrentIndex}"
+                  IsSwipeEnabled="True" />
 </ContentPage>

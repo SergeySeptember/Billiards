@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Storage;
-
-namespace Billiards.ViewModels;
+﻿namespace Billiards.ViewModels;
 
 public class SettingsViewModel : BaseViewModel
 {
@@ -24,14 +22,16 @@ public class SettingsViewModel : BaseViewModel
         var saved = Preferences.Default.Get("theme", "light");
         _isDarkTheme = saved == "dark";
 
-        ApplyTheme(); // Применяем тему при старте VM
+        ApplyTheme();
     }
 
     private void ApplyTheme()
     {
         var app = Application.Current;
         if (app is null)
+        {
             return;
+        }
 
         app.UserAppTheme = _isDarkTheme ? AppTheme.Dark : AppTheme.Light;
 

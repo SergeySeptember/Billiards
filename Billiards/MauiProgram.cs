@@ -1,5 +1,7 @@
 ﻿using Billiards.Data;
 using Billiards.Data.Repositories;
+using Billiards.ViewModels;
+using Billiards.Views;
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -22,13 +24,23 @@ public static class MauiProgram
 
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "billiards.db");
         var connectionString = $"Data Source={dbPath}";
-
-        builder.Services.AddDbContextFactory<BilliardsDbContext>(options =>
-            options.UseSqlite(connectionString));
+        builder.Services.AddDbContextFactory<BilliardsDbContext>(options => options.UseSqlite(connectionString));
 
         builder.Services.AddSingleton<IPlayerRepository, EfPlayerRepository>();
         builder.Services.AddSingleton<IMatchStatsRepository, EfMatchStatsRepository>();
 
+        builder.Services.AddSingleton<MainViewModel>();
+        builder.Services.AddSingleton<MatchViewModel>();
+        builder.Services.AddSingleton<SettingsViewModel>();
+        builder.Services.AddSingleton<StatsViewModel>();
+
+        builder.Services.AddTransient<MatchView>();
+        builder.Services.AddTransient<SettingsView>();
+        builder.Services.AddTransient<StatsView>();
+
+        builder.Services.AddSingleton<MainCarouselTemplateSelector>(); //
+        builder.Services.AddSingleton<MainPage>();
+        builder.Services.AddSingleton<AppShell>();
 
 #if DEBUG
         builder.Logging.AddDebug();

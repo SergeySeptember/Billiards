@@ -1,10 +1,14 @@
-﻿namespace Billiards
+﻿namespace Billiards;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell(MainPage mainPage)
     {
-        public AppShell()
+        InitializeComponent();
+
+        Items.Add(new ShellContent
         {
-            InitializeComponent();
-        }
+            Content = mainPage
+        });
     }
 }

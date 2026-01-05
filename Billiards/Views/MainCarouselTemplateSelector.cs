@@ -1,30 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Billiards.Core;
+﻿using Billiards.ViewModels;
 
-namespace Billiards.Views
+namespace Billiards.Views;
+
+public class MainCarouselTemplateSelector : DataTemplateSelector
 {
-    public class MainCarouselTemplateSelector : DataTemplateSelector
-    {
-        public DataTemplate? SettingsTemplate { get; set; }
-        public DataTemplate? MatchTemplate { get; set; }
-        public DataTemplate? StatsTemplate { get; set; }
+    public DataTemplate SettingsTemplate { get; set; } = null!;
+    public DataTemplate MatchTemplate { get; set; } = null!;
+    public DataTemplate StatsTemplate { get; set; } = null!;
 
-        protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
+    protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
+        => item switch
         {
-            if (item is not MainPageKind kind)
-                return MatchTemplate ?? new DataTemplate();
-
-            return kind switch
-            {
-                MainPageKind.Settings => SettingsTemplate ?? new DataTemplate(),
-                MainPageKind.Match => MatchTemplate ?? new DataTemplate(),
-                MainPageKind.Stats => StatsTemplate ?? new DataTemplate(),
-                _ => MatchTemplate ?? new DataTemplate()
-            };
-        }
-    }
+            SettingsViewModel => SettingsTemplate,
+            MatchViewModel => MatchTemplate,
+            StatsViewModel => StatsTemplate,
+            _ => MatchTemplate
+        };
 }

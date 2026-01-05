@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Billiards.Data.Repositories;
 
-public class EfPlayerRepository : IPlayerRepository
+public class EfPlayerRepository(IDbContextFactory<BilliardsDbContext> dbFactory) : IPlayerRepository
 {
-    private readonly IDbContextFactory<BilliardsDbContext> _dbFactory;
-
-    public EfPlayerRepository(IDbContextFactory<BilliardsDbContext> dbFactory) => _dbFactory = dbFactory;
-
     public async Task<Player> AddAsync(string name, CancellationToken ct = default)
     {
         name = (name ?? "").Trim();
@@ -17,7 +13,7 @@ public class EfPlayerRepository : IPlayerRepository
             throw new ArgumentException("Имя игрока не может быть пустым.", nameof(name));
         }
 
-        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
 
         var existing = await db.Players.FirstOrDefaultAsync(p => p.Name == name, ct);
         if (existing is not null)
@@ -34,10 +30,7 @@ public class EfPlayerRepository : IPlayerRepository
 
     public async Task<List<Player>> GetAllAsync(CancellationToken ct = default)
     {
-        await using var db = await _dbFactory.CreateDbContextAsync(ct);
-
-        return await db.Players
-            .OrderBy(p => p.Name)
-            .ToListAsync(ct);
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        return await db.Players.ToListAsync(ct);
     }
 }
