@@ -1,7 +1,8 @@
 ﻿using Billiards.Abstractions;
-using Billiards.Data;
-using Billiards.Data.Repositories;
-using Billiards.Service;
+using Billiards.Core;
+using Billiards.Core.Service;
+using Billiards.DataBase;
+using Billiards.DataBase.Repositories;
 using Billiards.ViewModels;
 using Billiards.Views;
 using CommunityToolkit.Maui;
@@ -46,6 +47,8 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<IPlayersStore, PlayersStore>();
         builder.Services.AddSingleton<IMatchesStore, MatchesStore>();
+
+        builder.Services.AddSingleton<IDatabaseBackupService, DatabaseBackupService>();
 
 #if DEBUG
         builder.Logging.AddDebug();

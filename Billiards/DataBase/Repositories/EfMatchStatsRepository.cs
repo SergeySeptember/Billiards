@@ -1,8 +1,8 @@
 ﻿using Billiards.Abstractions;
-using Billiards.Core.Entities.DB;
+using Billiards.DataBase.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Billiards.Data.Repositories;
+namespace Billiards.DataBase.Repositories;
 
 public class EfMatchStatsRepository(IDbContextFactory<BilliardsDbContext> dbFactory) : IMatchStatsRepository
 {

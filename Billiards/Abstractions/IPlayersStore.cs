@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using Billiards.Core.Entities.DB;
+using Billiards.DataBase.Entities;
 
 namespace Billiards.Abstractions;
 

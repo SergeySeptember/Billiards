@@ -1,7 +1,7 @@
-﻿using Billiards.Core.Entities.DB;
+﻿using Billiards.DataBase.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Billiards.Data;
+namespace Billiards.DataBase;
 
 public class BilliardsDbContext : DbContext
 {

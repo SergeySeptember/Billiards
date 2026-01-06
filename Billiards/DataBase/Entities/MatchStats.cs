@@ -1,20 +1,4 @@
-﻿namespace Billiards.Core.Entities.DB;
-
-public class Player
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = null!;
-}
-
-public class PlayerStats : Player
-{
-    public string PlayerName { get; set; } = null!;
-    public int WinRate { get; set; }
-    public int Balls { get; set; }
-    public int AccidentalBalls { get; set; }
-    public int FoulsBalls { get; set; }
-    public int IsBreakShot { get; set; }
-}
+﻿namespace Billiards.DataBase.Entities;
 
 public class MatchStats
 {

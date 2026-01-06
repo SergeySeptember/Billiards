@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using Billiards.Abstractions;
-using Billiards.Core.Entities.DB;
+using Billiards.DataBase.Entities;
 
-namespace Billiards.Service;
+namespace Billiards.Core.Service;
 
 public sealed class PlayersStore(IPlayerRepository repo) : IPlayersStore
 {

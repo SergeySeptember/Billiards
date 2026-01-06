@@ -48,6 +48,12 @@
                     </Grid>
 
                     <!-- Очистка БД -->
+                    <Button Text="Выгрузить данные"
+                            Command="{Binding ExportDataCommand}" />
+
+                    <Button Text="Загрузить данные"
+                            Command="{Binding ImportDataCommand}" />
+
                     <Button Text="Очистить БД"
                             Command="{Binding ClearDbCommand}"
                             BackgroundColor="{AppThemeBinding Light=#D9534F, Dark=#B9413E}"

@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using Billiards.Abstractions;
-using Billiards.Core.Entities.DB;
+using Billiards.DataBase.Entities;
 
-namespace Billiards.Service;
+namespace Billiards.Core;
 
 public sealed class MatchesStore(IMatchStatsRepository repo) : IMatchesStore
 {

@@ -72,10 +72,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Core\Services\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <MauiXaml Update="Views\MatchView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

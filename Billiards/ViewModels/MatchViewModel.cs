@@ -2,7 +2,7 @@
 using System.Windows.Input;
 using Billiards.Abstractions;
 using Billiards.Core;
-using Billiards.Core.Entities.DB;
+using Billiards.DataBase.Entities;
 
 namespace Billiards.ViewModels;
 
