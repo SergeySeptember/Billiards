@@ -61,7 +61,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <HorizontalStackLayout Spacing="12"
+            <HorizontalStackLayout Spacing="16"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center">
                 <!-- GitHub -->

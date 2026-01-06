@@ -1,7 +1,7 @@
 ﻿using Billiards.Abstractions;
 using Billiards.DataBase;
 using Billiards.DataBase.Entities;
-using Billiards.DTO;
+using Billiards.ModelAndDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Billiards.Core;
@@ -44,7 +44,7 @@ public sealed class DatabaseBackupService(IDbContextFactory<BilliardsDbContext> 
             })
             .ToListAsync();
 
-        return new BilliardsBackupDto
+        return new()
         {
             Players = players,
             Matches = matches

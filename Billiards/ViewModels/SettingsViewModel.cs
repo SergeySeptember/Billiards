@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Windows.Input;
 using Billiards.Abstractions;
-using Billiards.DTO;
+using Billiards.ModelAndDto;
 using CommunityToolkit.Maui.Storage;
 
 namespace Billiards.ViewModels;

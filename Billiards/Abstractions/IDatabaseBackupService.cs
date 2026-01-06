@@ -1,4 +1,4 @@
-﻿using Billiards.DTO;
+﻿using Billiards.ModelAndDto;
 
 namespace Billiards.Abstractions;
 

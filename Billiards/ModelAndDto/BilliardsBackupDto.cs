@@ -1,4 +1,4 @@
-﻿namespace Billiards.DTO;
+﻿namespace Billiards.ModelAndDto;
 
 public sealed class BilliardsBackupDto
 {

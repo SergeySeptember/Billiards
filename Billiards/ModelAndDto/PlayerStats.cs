@@ -1,4 +1,6 @@
-﻿namespace Billiards.DataBase.Entities;
+﻿using Billiards.DataBase.Entities;
+
+namespace Billiards.ModelAndDto;
 
 public class PlayerStats : Player
 {
