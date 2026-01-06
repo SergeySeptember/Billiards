@@ -1,17 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Billiards.Abstractions;
 using Billiards.Core;
 using Billiards.Core.Entities.DB;
-using Billiards.Data.Repositories;
 
 namespace Billiards.ViewModels;
 
 public class MatchViewModel : BaseViewModel
 {
-    private readonly IMatchStatsRepository _matchRepository;
-    private readonly IPlayerRepository _playerRepository;
     private readonly MatchTimer _matchTimer = new();
     private readonly IDispatcherTimer _uiTimer;
+    private readonly IPlayersStore _playersStore;
+    private readonly IMatchesStore _matchesStore;
 
     // ----- Виды бильярда -----
     public ObservableCollection<string> GameTypes { get; } = new()
@@ -40,7 +40,7 @@ public class MatchViewModel : BaseViewModel
     }
 
     // ----- Игроки -----
-    public ObservableCollection<Player> Players { get; } = new();
+    public ObservableCollection<Player> Players => _playersStore.Players;
 
     private Player? _playerA;
 
@@ -185,10 +185,10 @@ public class MatchViewModel : BaseViewModel
     public ICommand ToggleBreakShotCommand { get; }
     public ICommand ClearBreakShotCommand { get; }
 
-    public MatchViewModel(IMatchStatsRepository matchRepository, IPlayerRepository playerRepository, IDispatcher dispatcher)
+    public MatchViewModel(IDispatcher dispatcher, IPlayersStore playersStore, IMatchesStore matchesStore)
     {
-        _matchRepository = matchRepository;
-        _playerRepository = playerRepository;
+        _playersStore = playersStore;
+        _matchesStore = matchesStore;
 
         _selectedGameType = GameTypes.First();
 
@@ -216,13 +216,11 @@ public class MatchViewModel : BaseViewModel
         FoulsDecrementACommand = new Command(() => FoulsA--);
         FoulsIncrementBCommand = new Command(() => FoulsB++);
         FoulsDecrementBCommand = new Command(() => FoulsB--);
-
-        _ = LoadPlayersAsync();
     }
 
     private void StartStop()
     {
-        var page = GetCurrentPage();
+        var page = Shell.Current.CurrentPage;
 
         if (!_matchTimer.IsRunning)
         {
@@ -267,23 +265,6 @@ public class MatchViewModel : BaseViewModel
         OnPropertyChanged(nameof(StartStopButtonText));
     }
 
-    private bool ValidatePlayers(Page page)
-    {
-        if (PlayerA is null || PlayerB is null)
-        {
-            _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
-            return false;
-        }
-
-        if (PlayerA.Name == PlayerB.Name)
-        {
-            _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
-            return false;
-        }
-
-        return true;
-    }
-
     private void Stop()
     {
         _matchTimer.Stop();
@@ -299,7 +280,7 @@ public class MatchViewModel : BaseViewModel
     {
         Stop();
 
-        var page = GetCurrentPage();
+        var page = Shell.Current.CurrentPage;
         var hasActivity = TimerText != "00:00:00";
 
         if (hasActivity)
@@ -349,9 +330,26 @@ public class MatchViewModel : BaseViewModel
         OnPropertyChanged(nameof(StartStopButtonText));
     }
 
+    private bool ValidatePlayers(Page page)
+    {
+        if (PlayerA is null || PlayerB is null)
+        {
+            _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
+            return false;
+        }
+
+        if (PlayerA.Name == PlayerB.Name)
+        {
+            _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task<bool> SaveMatchAsync()
     {
-        var page = GetCurrentPage();
+        var page = Shell.Current.CurrentPage;
         MatchStats matchStats = new()
         {
             CurrentDateTime = DateTime.Now,
@@ -394,7 +392,7 @@ public class MatchViewModel : BaseViewModel
             return false;
         }
 
-        await _matchRepository.AddAsync(matchStats);
+        await _matchesStore.AddAsync(matchStats);
         return true;
     }
 
@@ -426,33 +424,6 @@ public class MatchViewModel : BaseViewModel
         if (PlayerB is not null && PlayerB != PlayerA)
         {
             BreakerCandidates.Add(PlayerB);
-        }
-    }
-
-    private static Page GetCurrentPage()
-    {
-        if (Shell.Current?.CurrentPage is { } shellPage)
-        {
-            return shellPage;
-        }
-
-        return Application.Current?.Windows.FirstOrDefault()?.Page;
-    }
-
-    private async Task LoadPlayersAsync()
-    {
-        try
-        {
-            var players = await _playerRepository.GetAllAsync();
-            Players.Clear();
-            foreach (var player in players)
-            {
-                Players.Add(player);
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Failed to load players: {ex}");
         }
     }
 }

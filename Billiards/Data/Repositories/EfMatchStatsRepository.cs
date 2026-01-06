@@ -1,15 +1,29 @@
-﻿using Billiards.Core.Entities.DB;
+﻿using Billiards.Abstractions;
+using Billiards.Core.Entities.DB;
 using Microsoft.EntityFrameworkCore;
 
 namespace Billiards.Data.Repositories;
 
 public class EfMatchStatsRepository(IDbContextFactory<BilliardsDbContext> dbFactory) : IMatchStatsRepository
 {
-    public async Task AddAsync(MatchStats match, CancellationToken ct = default)
+    public async Task AddAsync(MatchStats match)
     {
-        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        await using var db = await dbFactory.CreateDbContextAsync();
 
         db.MatchStats.Add(match);
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<List<MatchStats>> GetAllAsync()
+    {
+        await using var db = await dbFactory.CreateDbContextAsync();
+        return await db.MatchStats.ToListAsync();
+    }
+
+    public async Task DeleteAllAsync()
+    {
+        await using var db = await dbFactory.CreateDbContextAsync();
+        db.MatchStats.RemoveRange(db.MatchStats);
+        await db.SaveChangesAsync();
     }
 }

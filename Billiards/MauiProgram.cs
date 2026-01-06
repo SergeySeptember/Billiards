@@ -1,5 +1,7 @@
-﻿using Billiards.Data;
+﻿using Billiards.Abstractions;
+using Billiards.Data;
 using Billiards.Data.Repositories;
+using Billiards.Service;
 using Billiards.ViewModels;
 using Billiards.Views;
 using CommunityToolkit.Maui;
@@ -38,9 +40,12 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsView>();
         builder.Services.AddTransient<StatsView>();
 
-        builder.Services.AddSingleton<MainCarouselTemplateSelector>(); //
+        builder.Services.AddSingleton<MainCarouselTemplateSelector>();
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<AppShell>();
+
+        builder.Services.AddSingleton<IPlayersStore, PlayersStore>();
+        builder.Services.AddSingleton<IMatchesStore, MatchesStore>();
 
 #if DEBUG
         builder.Logging.AddDebug();
