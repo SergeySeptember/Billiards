@@ -12,10 +12,18 @@ public class StatsViewModel : BaseViewModel
 
     public ObservableCollection<StatsRow> Rows { get; } = new();
 
-    public bool IsTableVisible => Rows.Count(x => x.MatchNo != string.Empty) > 1;
-    public bool IsEmptyVisible => Rows.Count(x => x.MatchNo != string.Empty) <= 1;
+    public bool IsEmptyVisible => MatchesCount <= 1;
+    public bool IsTableVisible => MatchesCount > 0;
 
-    public string MatchesCountText => $"Матчей сегодня: {Rows.Count(x => x.MatchNo != string.Empty)}";
+    private int _matchesCount;
+
+    public int MatchesCount
+    {
+        get => _matchesCount;
+        private set => SetProperty(ref _matchesCount, value);
+    }
+
+    public string MatchesCountText => $"Матчей сегодня: {MatchesCount}";
 
     public ICommand OpenByDaysCommand { get; }
     public ICommand OpenByPlayersCommand { get; }
@@ -35,12 +43,11 @@ public class StatsViewModel : BaseViewModel
 
         RebuildRows();
 
-        // Пока просто заглушки, но навигацию я сразу оставляю “правильную”
         OpenByDaysCommand = new Command(async () =>
         {
             if (Shell.Current is not null)
             {
-                await Shell.Current.DisplayAlert("По дням", "Сделаем на следующем этапе 🙂", "Ок");
+                await Shell.Current.GoToAsync(nameof(Views.StatsByDaysPage));
             }
         });
 
@@ -48,7 +55,7 @@ public class StatsViewModel : BaseViewModel
         {
             if (Shell.Current is not null)
             {
-                await Shell.Current.DisplayAlert("По игрокам", "Сделаем на следующем этапе 🙂", "Ок");
+                await Shell.Current.GoToAsync(nameof(Views.StatsByPlayersPage));
             }
         });
     }
@@ -64,6 +71,8 @@ public class StatsViewModel : BaseViewModel
             .OrderBy(m => m.CurrentDateTime)
             .ToList();
 
+        MatchesCount = todayMatches.Count;
+
         if (todayMatches.Count == 0)
         {
             Rows.Add(BuildSummaryRow(todayMatches));
@@ -78,10 +87,8 @@ public class StatsViewModel : BaseViewModel
             .OrderBy(g => g.Min(m => m.CurrentDateTime))
             .ToList();
 
-        for (var gi = 0; gi < groups.Count; gi++)
+        foreach (var g in groups)
         {
-            var g = groups[gi];
-
             var groupMatches = g
                 .OrderBy(m => dayIndex[m])
                 .ToList();
@@ -99,11 +106,6 @@ public class StatsViewModel : BaseViewModel
             }
 
             Rows.Add(BuildSummaryRow(groupMatches));
-
-            if (gi != groups.Count - 1)
-            {
-                Rows.Add(new());
-            }
         }
     }
 
@@ -146,6 +148,7 @@ public class StatsViewModel : BaseViewModel
             var isFirstPlayerWin = firstPlayerPoints > secondPlayerPoints;
             return new()
             {
+                MatchNo = "Σ",
                 Winner = isFirstPlayerWin ? firstPlayerName : secondPlayerName,
                 Loser = isFirstPlayerWin ? secondPlayerName : firstPlayerName,
                 Score = isFirstPlayerWin ? $"{firstPlayerMatchWin}:{secondPlayerMatchWin} ({firstPlayerPoints}:{secondPlayerPoints})" : $"{secondPlayerMatchWin}:{firstPlayerMatchWin} ({secondPlayerPoints}:{firstPlayerPoints})",
@@ -157,6 +160,7 @@ public class StatsViewModel : BaseViewModel
             var isFirstPlayerWin = firstPlayerMatchWin > secondPlayerMatchWin;
             return new()
             {
+                MatchNo = "Σ",
                 Winner = isFirstPlayerWin ? firstPlayerName : secondPlayerName,
                 Loser = isFirstPlayerWin ? secondPlayerName : firstPlayerName,
                 Score = isFirstPlayerWin ? $"{firstPlayerMatchWin}:{secondPlayerMatchWin} ({firstPlayerPoints}:{secondPlayerPoints})" : $"{secondPlayerMatchWin}:{firstPlayerMatchWin} ({secondPlayerPoints}:{firstPlayerPoints})",

@@ -33,4 +33,22 @@ public sealed class MatchesStore(IMatchStatsRepository repo) : IMatchesStore
         await repo.DeleteAllAsync();
         MainThread.BeginInvokeOnMainThread(() => Matches.Clear());
     }
+
+    public async Task DeleteByPlayerAsync(string playerName)
+    {
+        await repo.DeleteByPlayerAsync(playerName);
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            for (var i = Matches.Count - 1; i >= 0; i--)
+            {
+                var m = Matches[i];
+                if (string.Equals(m.WinnerPlayer, playerName, StringComparison.CurrentCultureIgnoreCase) ||
+                    string.Equals(m.LosePlayer, playerName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    Matches.RemoveAt(i);
+                }
+            }
+        });
+    }
 }

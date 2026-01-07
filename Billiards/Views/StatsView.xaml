@@ -10,147 +10,173 @@
 
     <ContentView.Resources>
 
-        <!-- Ячейка таблицы -->
         <Style x:Key="TableCellBorderStyle" TargetType="Border">
             <Setter Property="StrokeThickness" Value="1" />
-            <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#444444}" />
-            <Setter Property="Padding" Value="8,6" />
-            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="Padding" Value="6,4" />
         </Style>
 
-        <!-- Текст ячейки -->
-        <Style x:Key="TableCellLabelStyle" TargetType="Label">
-            <Setter Property="FontSize" Value="12" />
+        <Style x:Key="HeaderBorderStyle" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
+        </Style>
+
+        <Style x:Key="TableHeaderLabelStyle" TargetType="Label">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="LineBreakMode" Value="WordWrap" />
             <Setter Property="MaxLines" Value="2" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
             <Setter Property="VerticalTextAlignment" Value="Center" />
         </Style>
 
-        <!-- Заголовок -->
-        <Style x:Key="TableHeaderLabelStyle" TargetType="Label" BasedOn="{StaticResource TableCellLabelStyle}">
-            <Setter Property="FontAttributes" Value="Bold" />
-            <Setter Property="FontSize" Value="14" />
+        <Style x:Key="TableCellLabelStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+            <Setter Property="MaxLines" Value="2" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+
+            <Style.Triggers>
+                <DataTrigger TargetType="Label"
+                             Binding="{Binding MatchNo}"
+                             Value="Σ">
+                    <Setter Property="FontAttributes" Value="Bold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SummaryRowBorderStyle" TargetType="Border" BasedOn="{StaticResource TableCellBorderStyle}">
+            <Style.Triggers>
+                <DataTrigger TargetType="Border"
+                             Binding="{Binding MatchNo}"
+                             Value="Σ">
+                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
     </ContentView.Resources>
 
-    <Grid Padding="16">
-        <VerticalStackLayout Spacing="12">
+    <Grid Padding="16"
+      RowSpacing="10"
+      RowDefinitions="Auto,Auto,Auto,*,Auto">
 
-            <Label Text="Статистика"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+        <Label Grid.Row="0"
+           Text="Статистика"
+           FontSize="20"
+           FontAttributes="Bold"
+           HorizontalOptions="Center" />
 
-            <Label Text="{Binding MatchesCountText}"
-                   FontSize="14"
-                   HorizontalOptions="Center"
-                   Opacity="0.8" />
+        <Label Grid.Row="1"
+           Text="{Binding MatchesCountText}"
+           FontSize="14"
+           HorizontalOptions="Center"
+           Opacity="0.8" />
 
-            <Label Text="За сегодня матчей нет"
-                   IsVisible="{Binding IsEmptyVisible}"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"
-                   FontSize="16"
-                   Opacity="0.8"
-                   Margin="0,20,0,0" />
+        <Label Grid.Row="2"
+           Text="За сегодня матчей нет"
+           IsVisible="{Binding IsEmptyVisible}"
+           HorizontalOptions="Center"
+           FontSize="16"
+           Opacity="0.8"
+           Margin="0,20,0,0" />
 
-            <!-- Таблица (показываем только если Rows > 1) -->
-            <VerticalStackLayout Spacing="0"
-                                 IsVisible="{Binding IsTableVisible}">
+        <!-- Таблица -->
+        <Grid Grid.Row="3"
+          IsVisible="{Binding IsTableVisible}"
+          RowDefinitions="Auto,*"
+          RowSpacing="0">
 
-                <!-- Header -->
-                <Grid ColumnDefinitions="35,100,115,60,75"
-                      ColumnSpacing="0"
-                      RowSpacing="0">
+            <!-- Header -->
+            <Grid Grid.Row="0"
+              ColumnDefinitions="35,95,110,60,75"
+              ColumnSpacing="0"
+              RowSpacing="0">
 
-                    <Border Style="{StaticResource TableCellBorderStyle}">
-                        <Label Text="№"
-                               HorizontalTextAlignment="Center"
-                               Style="{StaticResource TableHeaderLabelStyle}" />
-                    </Border>
+                <Border Style="{StaticResource HeaderBorderStyle}">
+                    <Label Text="№" Style="{StaticResource TableHeaderLabelStyle}" />
+                </Border>
 
-                    <Border Grid.Column="1" Style="{StaticResource TableCellBorderStyle}">
-                        <Label Text="Победитель"
-                               Style="{StaticResource TableHeaderLabelStyle}" />
-                    </Border>
+                <Border Grid.Column="1" Style="{StaticResource HeaderBorderStyle}">
+                    <Label Text="Победитель" Style="{StaticResource TableHeaderLabelStyle}" />
+                </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource TableCellBorderStyle}">
-                        <Label Text="Проигравший"
-                               Style="{StaticResource TableHeaderLabelStyle}" />
-                    </Border>
+                <Border Grid.Column="2" Style="{StaticResource HeaderBorderStyle}">
+                    <Label Text="Проигравший" Style="{StaticResource TableHeaderLabelStyle}" />
+                </Border>
 
-                    <Border Grid.Column="3" Style="{StaticResource TableCellBorderStyle}">
-                        <Label Text="Счёт"
-                               HorizontalTextAlignment="Center"
-                               Style="{StaticResource TableHeaderLabelStyle}" />
-                    </Border>
+                <Border Grid.Column="3" Style="{StaticResource HeaderBorderStyle}">
+                    <Label Text="Счёт" Style="{StaticResource TableHeaderLabelStyle}" />
+                </Border>
 
-                    <Border Grid.Column="4" Style="{StaticResource TableCellBorderStyle}">
-                        <Label Text="Время"
-                               HorizontalTextAlignment="Center"
-                               Style="{StaticResource TableHeaderLabelStyle}" />
-                    </Border>
-                </Grid>
-
-                <!-- Rows -->
-                <CollectionView ItemsSource="{Binding Rows}"
-                                SelectionMode="None">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
-                    </CollectionView.ItemsLayout>
-
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="modelAndDto:StatsRow">
-                            <Grid ColumnDefinitions="35,100,115,60,75"
-                                  ColumnSpacing="0"
-                                  RowSpacing="0">
-
-                                <Border Style="{StaticResource TableCellBorderStyle}">
-                                    <Label Text="{Binding MatchNo}"
-                                           HorizontalTextAlignment="Center"
-                                           Style="{StaticResource TableCellLabelStyle}" />
-                                </Border>
-
-                                <Border Grid.Column="1" Style="{StaticResource TableCellBorderStyle}">
-                                    <Label Text="{Binding Winner}"
-                                           Style="{StaticResource TableCellLabelStyle}" />
-                                </Border>
-
-                                <Border Grid.Column="2" Style="{StaticResource TableCellBorderStyle}">
-                                    <Label Text="{Binding Loser}"
-                                           Style="{StaticResource TableCellLabelStyle}" />
-                                </Border>
-
-                                <Border Grid.Column="3" Style="{StaticResource TableCellBorderStyle}">
-                                    <Label Text="{Binding Score}"
-                                           HorizontalTextAlignment="Center"
-                                           Style="{StaticResource TableCellLabelStyle}" />
-                                </Border>
-
-                                <Border Grid.Column="4" Style="{StaticResource TableCellBorderStyle}">
-                                    <Label Text="{Binding Time}"
-                                           HorizontalTextAlignment="Center"
-                                           Style="{StaticResource TableCellLabelStyle}" />
-                                </Border>
-
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-
-            </VerticalStackLayout>
-
-            <Grid ColumnSpacing="10" ColumnDefinitions="*,*">
-                <Button Grid.Column="0"
-                        Text="По дням"
-                        Command="{Binding OpenByDaysCommand}" />
-                <Button Grid.Column="1"
-                        Text="По игрокам"
-                        Command="{Binding OpenByPlayersCommand}" />
+                <Border Grid.Column="4" Style="{StaticResource HeaderBorderStyle}">
+                    <Label Text="Время" Style="{StaticResource TableHeaderLabelStyle}" />
+                </Border>
             </Grid>
 
-        </VerticalStackLayout>
+            <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Rows}"
+                        SelectionMode="None"
+                        VerticalOptions="Fill"
+                        Margin="0,0,0,0">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="modelAndDto:StatsRow">
+                        <Grid ColumnDefinitions="35,95,110,60,75"
+                          ColumnSpacing="0"
+                          RowSpacing="0">
+
+                            <Grid.Triggers>
+                                <DataTrigger TargetType="Grid" Binding="{Binding MatchNo}" Value="Σ">
+                                    <Setter Property="Margin" Value="0,0,0,12" />
+                                </DataTrigger>
+                            </Grid.Triggers>
+
+                            <Border Style="{StaticResource SummaryRowBorderStyle}">
+                                <Label Text="{Binding MatchNo}"
+                                   Style="{StaticResource TableCellLabelStyle}" />
+                            </Border>
+
+                            <Border Grid.Column="1" Style="{StaticResource SummaryRowBorderStyle}">
+                                <Label Text="{Binding Winner}"
+                                   Style="{StaticResource TableCellLabelStyle}" />
+                            </Border>
+
+                            <Border Grid.Column="2" Style="{StaticResource SummaryRowBorderStyle}">
+                                <Label Text="{Binding Loser}"
+                                   Style="{StaticResource TableCellLabelStyle}" />
+                            </Border>
+
+                            <Border Grid.Column="3" Style="{StaticResource SummaryRowBorderStyle}">
+                                <Label Text="{Binding Score}"
+                                   Style="{StaticResource TableCellLabelStyle}" />
+                            </Border>
+
+                            <Border Grid.Column="4" Style="{StaticResource SummaryRowBorderStyle}">
+                                <Label Text="{Binding Time}"
+                                   Style="{StaticResource TableCellLabelStyle}" />
+                            </Border>
+
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </Grid>
+
+        <Grid Grid.Row="4"
+          ColumnSpacing="10"
+          ColumnDefinitions="*,*">
+            <Button Grid.Column="0"
+                Text="По дням"
+                Command="{Binding OpenByDaysCommand}" />
+            <Button Grid.Column="1"
+                Text="По игрокам"
+                Command="{Binding OpenByPlayersCommand}" />
+        </Grid>
 
     </Grid>
+
 </ContentView>

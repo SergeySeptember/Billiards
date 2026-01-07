@@ -2,7 +2,7 @@
 using Billiards.Abstractions;
 using Billiards.DataBase.Entities;
 
-namespace Billiards.Core.Service;
+namespace Billiards.Core;
 
 public sealed class PlayersStore(IPlayerRepository repo) : IPlayersStore
 {

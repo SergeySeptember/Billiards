@@ -9,4 +9,5 @@ public interface IMatchesStore
     Task ReloadAsync();
     Task AddAsync(MatchStats match);
     Task DeleteAllAsync();
+    Task DeleteByPlayerAsync(string playerName);
 }

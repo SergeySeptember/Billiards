@@ -1,13 +1,11 @@
 ﻿using Billiards.Abstractions;
 using Billiards.Core;
-using Billiards.Core.Service;
 using Billiards.DataBase;
 using Billiards.DataBase.Repositories;
 using Billiards.ViewModels;
 using Billiards.Views;
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Billiards;
 
@@ -29,30 +27,32 @@ public static class MauiProgram
         var connectionString = $"Data Source={dbPath}";
         builder.Services.AddDbContextFactory<BilliardsDbContext>(options => options.UseSqlite(connectionString));
 
-        builder.Services.AddSingleton<IPlayerRepository, EfPlayerRepository>();
-        builder.Services.AddSingleton<IMatchStatsRepository, EfMatchStatsRepository>();
-
         builder.Services.AddSingleton<MainViewModel>();
+        builder.Services.AddSingleton<MainPage>();
+        builder.Services.AddSingleton<MainCarouselTemplateSelector>();
+
         builder.Services.AddSingleton<MatchViewModel>();
         builder.Services.AddSingleton<SettingsViewModel>();
         builder.Services.AddSingleton<StatsViewModel>();
 
-        builder.Services.AddTransient<MatchView>();
-        builder.Services.AddTransient<SettingsView>();
-        builder.Services.AddTransient<StatsView>();
+        builder.Services.AddTransient<StatsByDaysPage>();
+        builder.Services.AddTransient<StatsByDaysViewModel>();
 
-        builder.Services.AddSingleton<MainCarouselTemplateSelector>();
-        builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<AppShell>();
+
+        builder.Services.AddTransient<StatsByPlayersViewModel>();
+        builder.Services.AddTransient<StatsByPlayersPage>();
+
+        builder.Services.AddSingleton<IPlayerRepository, EfPlayerRepository>();
+        builder.Services.AddSingleton<IMatchStatsRepository, EfMatchStatsRepository>();
 
         builder.Services.AddSingleton<IPlayersStore, PlayersStore>();
         builder.Services.AddSingleton<IMatchesStore, MatchesStore>();
 
         builder.Services.AddSingleton<IDatabaseBackupService, DatabaseBackupService>();
 
-#if DEBUG
-        builder.Logging.AddDebug();
-#endif
+        Routing.RegisterRoute(nameof(StatsByDaysPage), typeof(StatsByDaysPage));
+        Routing.RegisterRoute(nameof(StatsByPlayersPage), typeof(StatsByPlayersPage));
 
         var app = builder.Build();
 

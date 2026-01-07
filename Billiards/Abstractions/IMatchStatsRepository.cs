@@ -7,4 +7,5 @@ public interface IMatchStatsRepository
     Task AddAsync(MatchStats match);
     Task<List<MatchStats>> GetAllAsync();
     Task DeleteAllAsync();
+    Task DeleteByPlayerAsync(string playerName);
 }

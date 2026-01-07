@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage
+    x:Class="Billiards.Views.StatsByPlayersPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Billiards.ViewModels"
+    xmlns:dto="clr-namespace:Billiards.ModelAndDto"
+    x:DataType="vm:StatsByPlayersViewModel"
+    Title="По игрокам">
+
+    <ContentPage.Resources>
+        <Style x:Key="CellBorder" TargetType="Border">
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#404040}" />
+            <Setter Property="Padding" Value="6,4" />
+        </Style>
+
+        <Style x:Key="HeaderBorderStyle" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
+        </Style>
+
+        <Style x:Key="HeaderLabel" TargetType="Label">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CellLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+            <Setter Property="MaxLines" Value="2" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
+        <Label Text="Статистика по игрокам"
+               FontSize="20"
+               FontAttributes="Bold"
+               HorizontalOptions="Center" />
+
+        <Label Grid.Row="2"
+               Text="Данных пока нет"
+               IsVisible="{Binding IsEmptyVisible}"
+               HorizontalOptions="Center"
+               Opacity="0.8"
+               Margin="0,12,0,0" />
+
+        <ScrollView Grid.Row="3"
+                    Orientation="Horizontal"
+                    IsVisible="{Binding IsTableVisible}">
+
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Header -->
+                <Grid ColumnDefinitions="130,40,70,60,70,130"
+                      ColumnSpacing="0"
+                      RowSpacing="0">
+
+                    <Border Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Игрок" Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Игр" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Winrate" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="3" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Дураки" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Штрафы" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="5" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Забитие с разбоя" HorizontalTextAlignment="Center"
+                               Style="{StaticResource HeaderLabel}" />
+                    </Border>
+                </Grid>
+
+                <!-- Rows -->
+                <CollectionView ItemsSource="{Binding Rows}"
+                                SelectionMode="None"
+                                VerticalOptions="Fill">
+
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dto:PlayerStats">
+                            <Grid ColumnDefinitions="130,40,70,60,70,130"
+                                  ColumnSpacing="0"
+                                  RowSpacing="0">
+
+                                <Border Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding PlayerName}"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="1" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding GamePlayed}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="2" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding WinRate, StringFormat='{0:0.#}%'}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="3" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding AccidentalBalls}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="4" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding FoulsBalls}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="5" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding BreakShot}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

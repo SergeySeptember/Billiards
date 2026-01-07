@@ -11,8 +11,9 @@
         <VerticalStackLayout Padding="16" Spacing="14">
 
             <Label Text="Настройки"
-                   FontSize="24"
-                   FontAttributes="Bold" />
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
 
             <!-- Верхняя часть -->
             <Border Padding="14"

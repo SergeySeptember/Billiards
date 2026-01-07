@@ -9,7 +9,6 @@ public class EfMatchStatsRepository(IDbContextFactory<BilliardsDbContext> dbFact
     public async Task AddAsync(MatchStats match)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
-
         db.MatchStats.Add(match);
         await db.SaveChangesAsync();
     }
@@ -25,5 +24,13 @@ public class EfMatchStatsRepository(IDbContextFactory<BilliardsDbContext> dbFact
         await using var db = await dbFactory.CreateDbContextAsync();
         db.MatchStats.RemoveRange(db.MatchStats);
         await db.SaveChangesAsync();
+    }
+
+    public async Task DeleteByPlayerAsync(string playerName)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync();
+        await db.MatchStats
+            .Where(m => m.WinnerPlayer == playerName || m.LosePlayer == playerName)
+            .ExecuteDeleteAsync();
     }
 }

@@ -1,13 +1,11 @@
-﻿using Billiards.DataBase.Entities;
+﻿namespace Billiards.ModelAndDto;
 
-namespace Billiards.ModelAndDto;
-
-public class PlayerStats : Player
+public class PlayerStats
 {
     public string PlayerName { get; set; } = null!;
-    public int WinRate { get; set; }
-    public int Balls { get; set; }
+    public int GamePlayed { get; set; }
+    public double WinRate { get; set; }
     public int AccidentalBalls { get; set; }
     public int FoulsBalls { get; set; }
-    public int IsBreakShot { get; set; }
+    public int BreakShot { get; set; }
 }

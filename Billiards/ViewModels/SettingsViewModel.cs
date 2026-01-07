@@ -112,7 +112,7 @@ public class SettingsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await (Shell.Current?.CurrentPage?.DisplayAlert("Ошибка экспорта", ex.Message, "Ок") ?? Task.CompletedTask);
+            await (Shell.Current.CurrentPage.DisplayAlert("Ошибка экспорта", ex.Message, "Ок") ?? Task.CompletedTask);
         }
     }
 
@@ -201,27 +201,50 @@ public class SettingsViewModel : BaseViewModel
     private async Task DeletePlayerAsync()
     {
         var page = Shell.Current.CurrentPage;
-        var name = await page.DisplayPromptAsync(
+
+        var names = _playersStore.Players
+            .Select(p => p.Name)
+            .ToArray();
+        if (names.Length == 0)
+        {
+            await page.DisplayAlert("Пусто", "Удалять некого — список игроков пуст.", "Ок");
+            return;
+        }
+
+        var selected = await page.DisplayActionSheet(
             "Удалить игрока",
-            "Введи имя игрока",
-            "Удалить",
             "Отмена",
-            "Иосиф Абрамов");
-        if (string.IsNullOrWhiteSpace(name))
+            null,
+            names);
+        if (string.IsNullOrWhiteSpace(selected) || selected == "Отмена")
         {
             return;
         }
 
-        name = name.Trim();
+        var confirm = await page.DisplayAlert(
+            "Подтверди удаление",
+            $"Удалить игрока «{selected}» и ВСЕ партии, где он участвовал?",
+            "Удалить",
+            "Отмена");
 
-        var result = await _playersStore.DeleteAsync(name);
-        if (result)
+        if (!confirm)
         {
-            await page.DisplayAlert("Готово", $"Игрок {name} удалён.", "Ок");
+            return;
+        }
+
+        await _matchesStore.DeleteByPlayerAsync(selected);
+        var deletedPlayer = await _playersStore.DeleteAsync(selected);
+
+        if (deletedPlayer)
+        {
+            await page.DisplayAlert(
+                "Готово",
+                $"Игрок удалён: {selected}",
+                "Ок");
         }
         else
         {
-            await page.DisplayAlert("Ой", $"Игрок {name} почему-то не удалился...", "Ок");
+            await page.DisplayAlert("Ой", $"Игрок «{selected}» почему-то не удалился…", "Ок");
         }
     }
 

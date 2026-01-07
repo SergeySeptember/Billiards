@@ -29,353 +29,361 @@
     </ContentView.Resources>
 
     <ScrollView>
-        <Grid x:Name="Root"
-              Padding="16"
-              RowSpacing="6"
-              ColumnSpacing="6"
-              x:DataType="viewModels:MatchViewModel">
+        <Border Padding="14"
+                StrokeThickness="1"
+                Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+                StrokeShape="RoundRectangle 20">
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <!-- 0: Тип бильярда -->
-                <RowDefinition Height="Auto" />
-                <!-- 1: Игроки -->
-                <RowDefinition Height="Auto" />
-                <!-- 2: Разбивает -->
-                <RowDefinition Height="Auto" />
-                <!-- 3: Заголовок: забитые -->
-                <RowDefinition Height="Auto" />
-                <!-- 4: Забитые: значения -->
-                <RowDefinition Height="Auto" />
-                <!-- 5: Забитые: кнопки -->
-                <RowDefinition Height="Auto" />
-                <!-- 6: Заголовок: дураки -->
-                <RowDefinition Height="Auto" />
-                <!-- 7: Дураки: значения -->
-                <RowDefinition Height="Auto" />
-                <!-- 8: Дураки: кнопки -->
-                <RowDefinition Height="Auto" />
-                <!-- 9: Заголовок: штрафы -->
-                <RowDefinition Height="Auto" />
-                <!-- 10: Штрафы: значения -->
-                <RowDefinition Height="Auto" />
-                <!-- 11: Штрафы: кнопки -->
-                <RowDefinition Height="Auto" />
-                <!-- 12: Таймер -->
-                <RowDefinition Height="Auto" />
-                <!-- 13: Кнопки (Старт/Стоп + Новая партия) -->
-            </Grid.RowDefinitions>
+            <Grid x:Name="Root"
+                  Padding="16"
+                  RowSpacing="6"
+                  ColumnSpacing="6"
+                  x:DataType="viewModels:MatchViewModel">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <!-- Тип бильярда -->
-            <Picker Grid.Row="0"
-                    Grid.ColumnSpan="2"
-                    Title="Вид бильярда"
-                    Style="{StaticResource PlayerPickerStyle}"
-                    FontSize="18"
-                    SelectedItem="{Binding SelectedGameType, Mode=TwoWay}"
-                    IsEnabled="{Binding IsEditable}">
-                <Picker.Items>
-                    <x:String>Свободная пирамида</x:String>
-                    <x:String>Сибирская пирамида</x:String>
-                    <x:String>Московская пирамида</x:String>
-                    <x:String>Невская пирамида</x:String>
-                    <x:String>Бесконечная пирамида</x:String>
-                </Picker.Items>
-            </Picker>
-
-            <!-- Игроки -->
-            <Grid Grid.Row="1"
-                  Grid.ColumnSpan="2"
-                  ColumnSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <!-- 0: Тип бильярда -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 1: Игроки -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 2: Разбивает -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 3: Заголовок: забитые -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 4: Забитые: значения -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 5: Забитые: кнопки -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 6: Заголовок: дураки -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 7: Дураки: значения -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 8: Дураки: кнопки -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 9: Заголовок: штрафы -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 10: Штрафы: значения -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 11: Штрафы: кнопки -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 12: Таймер -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 13: Кнопки (Старт/Стоп + Новая партия) -->
+                </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Игрок A -->
-                <Grid Grid.Column="0">
+                <!-- Тип бильярда -->
+                <Picker Grid.Row="0"
+                        Grid.ColumnSpan="2"
+                        Title="Вид бильярда"
+                        Style="{StaticResource PlayerPickerStyle}"
+                        FontSize="18"
+                        SelectedItem="{Binding SelectedGameType, Mode=TwoWay}"
+                        IsEnabled="{Binding IsEditable}">
+                    <Picker.Items>
+                        <x:String>Свободная пирамида</x:String>
+                        <x:String>Сибирская пирамида</x:String>
+                        <x:String>Московская пирамида</x:String>
+                        <x:String>Невская пирамида</x:String>
+                        <x:String>Бесконечная пирамида</x:String>
+                    </Picker.Items>
+                </Picker>
 
-                    <!-- Карточка -->
-                    <Border Padding="8"
-                            StrokeThickness="1"
-                            Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
-                            StrokeShape="RoundRectangle 14">
+                <!-- Игроки -->
+                <Grid Grid.Row="1"
+                      Grid.ColumnSpan="2"
+                      ColumnSpacing="8">
 
-                        <Border.Behaviors>
-                            <toolkit:TouchBehavior
-                                IsEnabled="True"
-                                ShouldMakeChildrenInputTransparent="False"
-                                LongPressDuration="650"
-                                PressedScale="0.98"
-                                PressedOpacity="0.9"
-                                LongPressCommand="{Binding BindingContext.ToggleBreakShotCommand, Source={x:Reference Root}}"
-                                LongPressCommandParameter="{Binding BindingContext.PlayerA, Source={x:Reference Root}}" />
-                        </Border.Behaviors>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Первый игрок"
-                                   HorizontalTextAlignment="Center"
-                                   FontAttributes="Bold" />
+                    <!-- Игрок A -->
+                    <Grid Grid.Column="0">
 
-                            <Picker ItemsSource="{Binding Players}"
-                                    ItemDisplayBinding="{Binding Name}"
-                                    SelectedItem="{Binding PlayerA, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsEditable}"
-                                    Style="{StaticResource PlayerPickerStyle}" />
+                        <!-- Карточка -->
+                        <Border Padding="8"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+                                StrokeShape="RoundRectangle 14">
 
-                            <Border Padding="6,2"
-                                    Margin="0,4,0,0"
-                                    HorizontalOptions="Center"
-                                    StrokeThickness="0"
-                                    BackgroundColor="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
-                                    StrokeShape="RoundRectangle 999"
-                                    IsVisible="{Binding IsBreakShotA}">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ClearBreakShotCommand}" />
-                                </Border.GestureRecognizers>
+                            <Border.Behaviors>
+                                <toolkit:TouchBehavior
+                                    IsEnabled="True"
+                                    ShouldMakeChildrenInputTransparent="False"
+                                    LongPressDuration="650"
+                                    PressedScale="0.98"
+                                    PressedOpacity="0.9"
+                                    LongPressCommand="{Binding BindingContext.ToggleBreakShotCommand, Source={x:Reference Root}}"
+                                    LongPressCommandParameter="{Binding BindingContext.PlayerA, Source={x:Reference Root}}" />
+                            </Border.Behaviors>
 
-                                <Label Text="🎱 Забитие с разбоя"
-                                       FontAttributes="Bold"
-                                       FontSize="12"
-                                       TextColor="Black" />
-                            </Border>
-                        </VerticalStackLayout>
-                    </Border>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Первый игрок"
+                                       HorizontalTextAlignment="Center"
+                                       FontAttributes="Bold" />
 
-                    <Border IsVisible="{Binding IsBreakShotA}"
-                            InputTransparent="True"
-                            Stroke="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
-                            StrokeThickness="2"
-                            BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A2F12}"
-                            Opacity="0.35"
-                            StrokeShape="RoundRectangle 14" />
+                                <Picker ItemsSource="{Binding Players}"
+                                        ItemDisplayBinding="{Binding Name}"
+                                        SelectedItem="{Binding PlayerA, Mode=TwoWay}"
+                                        IsEnabled="{Binding IsEditable}"
+                                        Style="{StaticResource PlayerPickerStyle}" />
+
+                                <Border Padding="6,2"
+                                        Margin="0,4,0,0"
+                                        HorizontalOptions="Center"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
+                                        StrokeShape="RoundRectangle 999"
+                                        IsVisible="{Binding IsBreakShotA}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ClearBreakShotCommand}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Label Text="🎱 Забитие с разбоя"
+                                           FontAttributes="Bold"
+                                           FontSize="12"
+                                           TextColor="Black" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border IsVisible="{Binding IsBreakShotA}"
+                                InputTransparent="True"
+                                Stroke="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
+                                StrokeThickness="2"
+                                BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A2F12}"
+                                Opacity="0.35"
+                                StrokeShape="RoundRectangle 14" />
+                    </Grid>
+
+                    <!-- Игрок B -->
+                    <Grid Grid.Column="1">
+
+                        <!-- Карточка -->
+                        <Border Padding="8"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+                                StrokeShape="RoundRectangle 14">
+
+                            <Border.Behaviors>
+                                <toolkit:TouchBehavior
+                                    IsEnabled="True"
+                                    ShouldMakeChildrenInputTransparent="False"
+                                    LongPressDuration="650"
+                                    PressedScale="0.98"
+                                    PressedOpacity="0.9"
+                                    LongPressCommand="{Binding BindingContext.ToggleBreakShotCommand, Source={x:Reference Root}}"
+                                    LongPressCommandParameter="{Binding BindingContext.PlayerB, Source={x:Reference Root}}" />
+                            </Border.Behaviors>
+
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Второй игрок"
+                                       HorizontalTextAlignment="Center"
+                                       FontAttributes="Bold" />
+
+                                <Picker ItemsSource="{Binding Players}"
+                                        ItemDisplayBinding="{Binding Name}"
+                                        SelectedItem="{Binding PlayerB, Mode=TwoWay}"
+                                        IsEnabled="{Binding IsEditable}"
+                                        Style="{StaticResource PlayerPickerStyle}" />
+
+                                <Border Padding="6,2"
+                                        Margin="0,4,0,0"
+                                        HorizontalOptions="Center"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
+                                        StrokeShape="RoundRectangle 999"
+                                        IsVisible="{Binding IsBreakShotB}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ClearBreakShotCommand}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Label Text="🎱 Забитие с разбоя"
+                                           FontAttributes="Bold"
+                                           FontSize="12"
+                                           TextColor="Black" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border IsVisible="{Binding IsBreakShotB}"
+                                InputTransparent="True"
+                                Stroke="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
+                                StrokeThickness="2"
+                                BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A2F12}"
+                                Opacity="0.35"
+                                StrokeShape="RoundRectangle 14" />
+                    </Grid>
                 </Grid>
 
-                <!-- Игрок B -->
-                <Grid Grid.Column="1">
 
-                    <!-- Карточка -->
-                    <Border Padding="8"
-                            StrokeThickness="1"
-                            Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
-                            StrokeShape="RoundRectangle 14">
+                <!-- Разбивает -->
+                <Grid Grid.Row="2"
+                      Grid.ColumnSpan="2"
+                      ColumnDefinitions="Auto,*"
+                      ColumnSpacing="8"
+                      VerticalOptions="Center">
 
-                        <Border.Behaviors>
-                            <toolkit:TouchBehavior
-                                IsEnabled="True"
-                                ShouldMakeChildrenInputTransparent="False"
-                                LongPressDuration="650"
-                                PressedScale="0.98"
-                                PressedOpacity="0.9"
-                                LongPressCommand="{Binding BindingContext.ToggleBreakShotCommand, Source={x:Reference Root}}"
-                                LongPressCommandParameter="{Binding BindingContext.PlayerB, Source={x:Reference Root}}" />
-                        </Border.Behaviors>
+                    <Label Text="Разбивает:"
+                           FontAttributes="Bold"
+                           VerticalTextAlignment="Center"
+                           FontSize="16" />
 
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Второй игрок"
-                                   HorizontalTextAlignment="Center"
-                                   FontAttributes="Bold" />
-
-                            <Picker ItemsSource="{Binding Players}"
-                                    ItemDisplayBinding="{Binding Name}"
-                                    SelectedItem="{Binding PlayerB, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsEditable}"
-                                    Style="{StaticResource PlayerPickerStyle}" />
-
-                            <Border Padding="6,2"
-                                    Margin="0,4,0,0"
-                                    HorizontalOptions="Center"
-                                    StrokeThickness="0"
-                                    BackgroundColor="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
-                                    StrokeShape="RoundRectangle 999"
-                                    IsVisible="{Binding IsBreakShotB}">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ClearBreakShotCommand}" />
-                                </Border.GestureRecognizers>
-
-                                <Label Text="🎱 Забитие с разбоя"
-                                       FontAttributes="Bold"
-                                       FontSize="12"
-                                       TextColor="Black" />
-                            </Border>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Border IsVisible="{Binding IsBreakShotB}"
-                            InputTransparent="True"
-                            Stroke="{AppThemeBinding Light=#FFB300, Dark=#FFB300}"
-                            StrokeThickness="2"
-                            BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A2F12}"
-                            Opacity="0.35"
-                            StrokeShape="RoundRectangle 14" />
+                    <Picker Grid.Column="1"
+                            Title="Выбери игрока"
+                            ItemsSource="{Binding BreakerCandidates}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding BreakerPlayer, Mode=TwoWay}"
+                            IsEnabled="{Binding IsEditable}"
+                            Style="{StaticResource PlayerPickerStyle}" />
                 </Grid>
+
+                <!-- Забитые -->
+                <Label Grid.Row="3"
+                       Grid.ColumnSpan="2"
+                       Text="Забитые шары"
+                       Style="{StaticResource SectionTitleStyle}" />
+
+                <Grid Grid.Row="4" Grid.ColumnSpan="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Text="{Binding MainBallsA}" Style="{StaticResource ScoreValueStyle}" />
+                    <Label Grid.Column="1" Text="{Binding MainBallsB}" Style="{StaticResource ScoreValueStyle}" />
+                </Grid>
+
+                <Grid Grid.Row="5" Grid.ColumnSpan="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                        <Button Text=" + " FontSize="24" FontAttributes="Bold"
+                                Command="{Binding MainBallsIncrementACommand}" />
+                        <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
+                                Command="{Binding MainBallsDecrementACommand}" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                        <Button Text=" + " FontSize="24" FontAttributes="Bold"
+                                Command="{Binding MainBallsIncrementBCommand}" />
+                        <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
+                                Command="{Binding MainBallsDecrementBCommand}" />
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- Дураки -->
+                <Label Grid.Row="6"
+                       Grid.ColumnSpan="2"
+                       Text="Дураки"
+                       Style="{StaticResource SectionTitleStyle}" />
+
+                <Grid Grid.Row="7" Grid.ColumnSpan="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Text="{Binding AccidentalBallsA}" Style="{StaticResource ScoreValueStyle}" />
+                    <Label Grid.Column="1" Text="{Binding AccidentalBallsB}" Style="{StaticResource ScoreValueStyle}" />
+                </Grid>
+
+                <Grid Grid.Row="8" Grid.ColumnSpan="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                        <Button Text=" + " FontSize="24" FontAttributes="Bold"
+                                Command="{Binding AccidentalBallsIncrementACommand}" />
+                        <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
+                                Command="{Binding AccidentalBallsDecrementACommand}" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                        <Button Text=" + " FontSize="24" FontAttributes="Bold"
+                                Command="{Binding AccidentalBallsIncrementBCommand}" />
+                        <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
+                                Command="{Binding AccidentalBallsDecrementBCommand}" />
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- Штрафы -->
+                <Label Grid.Row="9"
+                       Grid.ColumnSpan="2"
+                       Text="Штрафы"
+                       Style="{StaticResource SectionTitleStyle}" />
+
+                <Grid Grid.Row="10" Grid.ColumnSpan="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Text="{Binding FoulsA}" Style="{StaticResource ScoreValueStyle}" />
+                    <Label Grid.Column="1" Text="{Binding FoulsB}" Style="{StaticResource ScoreValueStyle}" />
+                </Grid>
+
+                <Grid Grid.Row="11" Grid.ColumnSpan="2" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                        <Button Text=" + " FontSize="24" FontAttributes="Bold"
+                                Command="{Binding FoulsIncrementACommand}" />
+                        <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
+                                Command="{Binding FoulsDecrementACommand}" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                        <Button Text=" + " FontSize="24" FontAttributes="Bold"
+                                Command="{Binding FoulsIncrementBCommand}" />
+                        <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
+                                Command="{Binding FoulsDecrementBCommand}" />
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- Таймер -->
+                <Label Grid.Row="12"
+                       Grid.ColumnSpan="2"
+                       HorizontalOptions="Center"
+                       FontSize="36"
+                       Text="{Binding TimerText}" />
+
+                <!-- Кнопки: Старт/Стоп + Новая партия -->
+                <Grid Grid.Row="13"
+                      Grid.ColumnSpan="2"
+                      ColumnSpacing="8"
+                      Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            FontSize="18"
+                            Text="{Binding StartStopButtonText}"
+                            Command="{Binding StartStopCommand}" />
+
+                    <Button Grid.Column="1"
+                            FontSize="18"
+                            Text="Новая партия"
+                            Command="{Binding NewMatchCommand}" />
+                </Grid>
+
             </Grid>
-
-
-            <!-- Разбивает -->
-            <Grid Grid.Row="2"
-                  Grid.ColumnSpan="2"
-                  ColumnDefinitions="Auto,*"
-                  ColumnSpacing="8"
-                  VerticalOptions="Center">
-
-                <Label Text="Разбивает:"
-                       FontAttributes="Bold"
-                       VerticalTextAlignment="Center"
-                       FontSize="16" />
-
-                <Picker Grid.Column="1"
-                        Title="Выбери игрока"
-                        ItemsSource="{Binding BreakerCandidates}"
-                        ItemDisplayBinding="{Binding Name}"
-                        SelectedItem="{Binding BreakerPlayer, Mode=TwoWay}"
-                        IsEnabled="{Binding IsEditable}"
-                        Style="{StaticResource PlayerPickerStyle}" />
-            </Grid>
-
-            <!-- Забитые -->
-            <Label Grid.Row="3"
-                   Grid.ColumnSpan="2"
-                   Text="Забитые шары"
-                   Style="{StaticResource SectionTitleStyle}" />
-
-            <Grid Grid.Row="4" Grid.ColumnSpan="2" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Label Grid.Column="0" Text="{Binding MainBallsA}" Style="{StaticResource ScoreValueStyle}" />
-                <Label Grid.Column="1" Text="{Binding MainBallsB}" Style="{StaticResource ScoreValueStyle}" />
-            </Grid>
-
-            <Grid Grid.Row="5" Grid.ColumnSpan="2" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
-                    <Button Text=" + " FontSize="24" FontAttributes="Bold"
-                            Command="{Binding MainBallsIncrementACommand}" />
-                    <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
-                            Command="{Binding MainBallsDecrementACommand}" />
-                </HorizontalStackLayout>
-
-                <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center">
-                    <Button Text=" + " FontSize="24" FontAttributes="Bold"
-                            Command="{Binding MainBallsIncrementBCommand}" />
-                    <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
-                            Command="{Binding MainBallsDecrementBCommand}" />
-                </HorizontalStackLayout>
-            </Grid>
-
-            <!-- Дураки -->
-            <Label Grid.Row="6"
-                   Grid.ColumnSpan="2"
-                   Text="Дураки"
-                   Style="{StaticResource SectionTitleStyle}" />
-
-            <Grid Grid.Row="7" Grid.ColumnSpan="2" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Label Grid.Column="0" Text="{Binding AccidentalBallsA}" Style="{StaticResource ScoreValueStyle}" />
-                <Label Grid.Column="1" Text="{Binding AccidentalBallsB}" Style="{StaticResource ScoreValueStyle}" />
-            </Grid>
-
-            <Grid Grid.Row="8" Grid.ColumnSpan="2" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
-                    <Button Text=" + " FontSize="24" FontAttributes="Bold"
-                            Command="{Binding AccidentalBallsIncrementACommand}" />
-                    <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
-                            Command="{Binding AccidentalBallsDecrementACommand}" />
-                </HorizontalStackLayout>
-
-                <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center">
-                    <Button Text=" + " FontSize="24" FontAttributes="Bold"
-                            Command="{Binding AccidentalBallsIncrementBCommand}" />
-                    <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
-                            Command="{Binding AccidentalBallsDecrementBCommand}" />
-                </HorizontalStackLayout>
-            </Grid>
-
-            <!-- Штрафы -->
-            <Label Grid.Row="9"
-                   Grid.ColumnSpan="2"
-                   Text="Штрафы"
-                   Style="{StaticResource SectionTitleStyle}" />
-
-            <Grid Grid.Row="10" Grid.ColumnSpan="2" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Label Grid.Column="0" Text="{Binding FoulsA}" Style="{StaticResource ScoreValueStyle}" />
-                <Label Grid.Column="1" Text="{Binding FoulsB}" Style="{StaticResource ScoreValueStyle}" />
-            </Grid>
-
-            <Grid Grid.Row="11" Grid.ColumnSpan="2" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
-                    <Button Text=" + " FontSize="24" FontAttributes="Bold" Command="{Binding FoulsIncrementACommand}" />
-                    <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
-                            Command="{Binding FoulsDecrementACommand}" />
-                </HorizontalStackLayout>
-
-                <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center">
-                    <Button Text=" + " FontSize="24" FontAttributes="Bold" Command="{Binding FoulsIncrementBCommand}" />
-                    <Button Text=" - " FontSize="28" FontAttributes="Bold" Margin="16,0,0,0"
-                            Command="{Binding FoulsDecrementBCommand}" />
-                </HorizontalStackLayout>
-            </Grid>
-
-            <!-- Таймер -->
-            <Label Grid.Row="12"
-                   Grid.ColumnSpan="2"
-                   HorizontalOptions="Center"
-                   FontSize="36"
-                   Text="{Binding TimerText}" />
-
-            <!-- Кнопки: Старт/Стоп + Новая партия -->
-            <Grid Grid.Row="13"
-                  Grid.ColumnSpan="2"
-                  ColumnSpacing="8"
-                  Margin="0,10,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0"
-                        FontSize="18"
-                        Text="{Binding StartStopButtonText}"
-                        Command="{Binding StartStopCommand}" />
-
-                <Button Grid.Column="1"
-                        FontSize="18"
-                        Text="Новая партия"
-                        Command="{Binding NewMatchCommand}" />
-            </Grid>
-
-        </Grid>
+        </Border>
     </ScrollView>
 </ContentView>
