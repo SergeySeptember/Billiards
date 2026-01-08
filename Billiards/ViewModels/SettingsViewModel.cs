@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Windows.Input;
 using Billiards.Abstractions;
+using Billiards.Enum;
 using Billiards.ModelAndDto;
 using CommunityToolkit.Maui.Storage;
 
@@ -18,6 +19,7 @@ public class SettingsViewModel : BaseViewModel
     private bool _isDarkTheme;
 
     private readonly IDatabaseBackupService _backupService;
+    private readonly ISoundService _soundService;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -61,22 +63,17 @@ public class SettingsViewModel : BaseViewModel
     public ICommand OpenTelegramCommand { get; }
     public ICommand OpenRulesCommand { get; }
 
-    public SettingsViewModel(IPlayersStore playersStore, IMatchesStore matchesStore, IDatabaseBackupService backupService)
+    public SettingsViewModel(IPlayersStore playersStore, IMatchesStore matchesStore, IDatabaseBackupService backupService, ISoundService soundService)
     {
         _playersStore = playersStore;
         _matchesStore = matchesStore;
         _backupService = backupService;
+        _soundService = soundService;
 
         ExportDataCommand = new Command(async () => await ExportDataAsync());
         ImportDataCommand = new Command(async () => await ImportDataAsync());
 
-        // загрузка настроек
-        var savedTheme = Preferences.Default.Get(ThemeKey, "light");
-        _isDarkTheme = savedTheme == "dark";
-
         _isSoundsEnabled = Preferences.Default.Get(SoundsKey, false);
-
-        ApplyTheme();
 
         AddPlayerCommand = new Command(async () => await AddPlayerAsync());
         DeletePlayerCommand = new Command(async () => await DeletePlayerAsync());
@@ -178,6 +175,27 @@ public class SettingsViewModel : BaseViewModel
         Preferences.Default.Set(ThemeKey, _isDarkTheme ? "dark" : "light");
     }
 
+    public void SyncThemeWithSystemIfNotSet()
+    {
+        var app = Application.Current;
+        if (app is null)
+        {
+            return;
+        }
+
+        if (Preferences.Default.ContainsKey(ThemeKey))
+        {
+            IsDarkTheme = Preferences.Default.Get(ThemeKey, "light") == "dark";
+            app.UserAppTheme = IsDarkTheme ? AppTheme.Dark : AppTheme.Light;
+        }
+        else
+        {
+            IsDarkTheme = app.RequestedTheme == AppTheme.Dark;
+            OnPropertyChanged(nameof(IsDarkTheme));
+            app.UserAppTheme = AppTheme.Unspecified;
+        }
+    }
+
     private async Task AddPlayerAsync()
     {
         var page = Shell.Current.CurrentPage;
@@ -195,6 +213,7 @@ public class SettingsViewModel : BaseViewModel
 
         name = name.Trim();
         await _playersStore.AddAsync(name);
+        _ = _soundService.PlayAsync(SoundId.FreshMeat);
         await page.DisplayAlert("Готово", $"Игрок добавлен: {name}", "Ок");
     }
 

@@ -44,16 +44,6 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="SummaryRowBorderStyle" TargetType="Border" BasedOn="{StaticResource TableCellBorderStyle}">
-            <Style.Triggers>
-                <DataTrigger TargetType="Border"
-                             Binding="{Binding MatchNo}"
-                             Value="Σ">
-                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
     </ContentView.Resources>
 
     <Grid Padding="16"
@@ -134,27 +124,27 @@
                                 </DataTrigger>
                             </Grid.Triggers>
 
-                            <Border Style="{StaticResource SummaryRowBorderStyle}">
+                            <Border Style="{StaticResource TableCellBorderStyle}">
                                 <Label Text="{Binding MatchNo}"
                                    Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="1" Style="{StaticResource SummaryRowBorderStyle}">
+                            <Border Grid.Column="1" Style="{StaticResource TableCellBorderStyle}">
                                 <Label Text="{Binding Winner}"
                                    Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="2" Style="{StaticResource SummaryRowBorderStyle}">
+                            <Border Grid.Column="2" Style="{StaticResource TableCellBorderStyle}">
                                 <Label Text="{Binding Loser}"
                                    Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="3" Style="{StaticResource SummaryRowBorderStyle}">
+                            <Border Grid.Column="3" Style="{StaticResource TableCellBorderStyle}">
                                 <Label Text="{Binding Score}"
                                    Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="4" Style="{StaticResource SummaryRowBorderStyle}">
+                            <Border Grid.Column="4" Style="{StaticResource TableCellBorderStyle}">
                                 <Label Text="{Binding Time}"
                                    Style="{StaticResource TableCellLabelStyle}" />
                             </Border>

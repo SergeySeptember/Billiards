@@ -161,7 +161,9 @@ public class StatsByDaysViewModel : BaseViewModel
             Winner = winner,
             Loser = loser,
             Score = score,
-            Time = FormatTime(avgTime)
+            Time = FormatTime(avgTime),
+            Fouls = "", // Todo:
+            Accidental = "" // Todo:
         };
     }
 

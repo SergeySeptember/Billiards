@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Billiards.Abstractions;
 using Billiards.Core;
 using Billiards.DataBase.Entities;
+using Billiards.Enum;
 
 namespace Billiards.ViewModels;
 
@@ -185,7 +186,7 @@ public class MatchViewModel : BaseViewModel
     public ICommand ToggleBreakShotCommand { get; }
     public ICommand ClearBreakShotCommand { get; }
 
-    public MatchViewModel(IDispatcher dispatcher, IPlayersStore playersStore, IMatchesStore matchesStore)
+    public MatchViewModel(IDispatcher dispatcher, IPlayersStore playersStore, IMatchesStore matchesStore, ISoundService soundService)
     {
         _playersStore = playersStore;
         _matchesStore = matchesStore;
@@ -207,14 +208,31 @@ public class MatchViewModel : BaseViewModel
         MainBallsIncrementBCommand = new Command(() => MainBallsB++);
         MainBallsDecrementBCommand = new Command(() => MainBallsB--);
 
-        AccidentalBallsIncrementACommand = new Command(() => AccidentalBallsA++);
+
+        AccidentalBallsIncrementACommand = new Command(() =>
+        {
+            AccidentalBallsA++;
+            _ = soundService.PlayAsync(SoundId.AccidentalPlus);
+        });
+        AccidentalBallsIncrementBCommand = new Command(() =>
+        {
+            AccidentalBallsB++;
+            _ = soundService.PlayAsync(SoundId.AccidentalPlus);
+        });
         AccidentalBallsDecrementACommand = new Command(() => AccidentalBallsA--);
-        AccidentalBallsIncrementBCommand = new Command(() => AccidentalBallsB++);
         AccidentalBallsDecrementBCommand = new Command(() => AccidentalBallsB--);
 
-        FoulsIncrementACommand = new Command(() => FoulsA++);
+        FoulsIncrementACommand = new Command(() =>
+        {
+            FoulsA++;
+            _ = soundService.PlayAsync(SoundId.Fall);
+        });
+        FoulsIncrementBCommand = new Command(() =>
+        {
+            FoulsB++;
+            _ = soundService.PlayAsync(SoundId.Fall);
+        });
         FoulsDecrementACommand = new Command(() => FoulsA--);
-        FoulsIncrementBCommand = new Command(() => FoulsB++);
         FoulsDecrementBCommand = new Command(() => FoulsB--);
     }
 
@@ -341,6 +359,12 @@ public class MatchViewModel : BaseViewModel
         if (PlayerA.Name == PlayerB.Name)
         {
             _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
+            return false;
+        }
+
+        if (BreakerPlayer is null)
+        {
+            _ = page.DisplayAlert("Ошибка", "Выбери кто будет разбивать!", "Ок");
             return false;
         }
 

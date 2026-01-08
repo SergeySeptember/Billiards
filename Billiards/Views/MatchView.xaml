@@ -29,10 +29,13 @@
     </ContentView.Resources>
 
     <ScrollView>
-        <Border Padding="14"
-                StrokeThickness="1"
-                Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
-                StrokeShape="RoundRectangle 20">
+        <Border
+            Margin="12"
+            Padding="16"
+            StrokeThickness="2"
+            Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+            StrokeShape="RoundRectangle 18"
+            BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
 
             <Grid x:Name="Root"
                   Padding="16"
@@ -125,8 +128,8 @@
 
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="Первый игрок"
-                                       HorizontalTextAlignment="Center"
-                                       FontAttributes="Bold" />
+                                       FontSize="16"
+                                       HorizontalTextAlignment="Center" />
 
                                 <Picker ItemsSource="{Binding Players}"
                                         ItemDisplayBinding="{Binding Name}"
@@ -184,8 +187,8 @@
 
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="Второй игрок"
-                                       HorizontalTextAlignment="Center"
-                                       FontAttributes="Bold" />
+                                       FontSize="16"
+                                       HorizontalTextAlignment="Center" />
 
                                 <Picker ItemsSource="{Binding Players}"
                                         ItemDisplayBinding="{Binding Name}"
@@ -231,9 +234,8 @@
                       VerticalOptions="Center">
 
                     <Label Text="Разбивает:"
-                           FontAttributes="Bold"
                            VerticalTextAlignment="Center"
-                           FontSize="16" />
+                           FontSize="18" />
 
                     <Picker Grid.Column="1"
                             Title="Выбери игрока"
@@ -359,7 +361,7 @@
                 <Label Grid.Row="12"
                        Grid.ColumnSpan="2"
                        HorizontalOptions="Center"
-                       FontSize="36"
+                       FontSize="32"
                        Text="{Binding TimerText}" />
 
                 <!-- Кнопки: Старт/Стоп + Новая партия -->

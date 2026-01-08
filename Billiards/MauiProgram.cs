@@ -6,6 +6,7 @@ using Billiards.ViewModels;
 using Billiards.Views;
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
+using Plugin.Maui.Audio;
 
 namespace Billiards;
 
@@ -27,6 +28,8 @@ public static class MauiProgram
         var connectionString = $"Data Source={dbPath}";
         builder.Services.AddDbContextFactory<BilliardsDbContext>(options => options.UseSqlite(connectionString));
 
+        builder.Services.AddSingleton<AppShell>();
+
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<MainCarouselTemplateSelector>();
@@ -38,8 +41,6 @@ public static class MauiProgram
         builder.Services.AddTransient<StatsByDaysPage>();
         builder.Services.AddTransient<StatsByDaysViewModel>();
 
-        builder.Services.AddSingleton<AppShell>();
-
         builder.Services.AddTransient<StatsByPlayersViewModel>();
         builder.Services.AddTransient<StatsByPlayersPage>();
 
@@ -50,6 +51,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<IMatchesStore, MatchesStore>();
 
         builder.Services.AddSingleton<IDatabaseBackupService, DatabaseBackupService>();
+
+        builder.Services.AddSingleton(AudioManager.Current);
+        builder.Services.AddSingleton<ISoundService, SoundService>();
 
         Routing.RegisterRoute(nameof(StatsByDaysPage), typeof(StatsByDaysPage));
         Routing.RegisterRoute(nameof(StatsByPlayersPage), typeof(StatsByPlayersPage));

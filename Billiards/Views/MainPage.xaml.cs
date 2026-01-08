@@ -5,15 +5,16 @@ namespace Billiards;
 
 public partial class MainPage : ContentPage
 {
-    public MainPage(MainViewModel vm, IPlayersStore players, IMatchesStore matches)
+    public MainPage(MainViewModel mainViewModel, IPlayersStore players, IMatchesStore matches, SettingsViewModel settingsViewModel)
     {
         InitializeComponent();
-        BindingContext = vm;
+        BindingContext = mainViewModel;
 
         Loaded += async (_, _) =>
         {
             await players.ReloadAsync();
             await matches.ReloadAsync();
+            settingsViewModel.SyncThemeWithSystemIfNotSet();
         };
     }
 }
