@@ -105,7 +105,15 @@ public class MatchViewModel : BaseViewModel
     public int MainBallsA
     {
         get => _mainBallsA;
-        set => SetProperty(ref _mainBallsA, value);
+        set
+        {
+            var negativeScore = Preferences.Default.Get("negative_score", "false");
+            if (string.Equals(negativeScore, "false", StringComparison.OrdinalIgnoreCase) && value < 0)
+            {
+                return;
+            }
+            SetProperty(ref _mainBallsA, value);
+        }
     }
 
     private int _mainBallsB;
@@ -113,7 +121,15 @@ public class MatchViewModel : BaseViewModel
     public int MainBallsB
     {
         get => _mainBallsB;
-        set => SetProperty(ref _mainBallsB, value);
+        set
+        {
+            var negativeScore = Preferences.Default.Get("negative_score", "false");
+            if (string.Equals(negativeScore, "false", StringComparison.OrdinalIgnoreCase) && value < 0)
+            {
+                return;
+            }
+            SetProperty(ref _mainBallsB, value);
+        }
     }
 
     private int _accidentalBallsA;
@@ -225,15 +241,57 @@ public class MatchViewModel : BaseViewModel
         FoulsIncrementACommand = new Command(() =>
         {
             FoulsA++;
+            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
+            if (foulMode == "shelf")
+            {
+                MainBallsB++;
+            }
+            else
+            {
+                MainBallsA--;
+            }
             _ = soundService.PlayAsync(SoundId.Fall);
         });
         FoulsIncrementBCommand = new Command(() =>
         {
             FoulsB++;
+            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
+            if (foulMode == "shelf")
+            {
+                MainBallsA++;
+            }
+            else
+            {
+                MainBallsB--;
+            }
             _ = soundService.PlayAsync(SoundId.Fall);
         });
-        FoulsDecrementACommand = new Command(() => FoulsA--);
-        FoulsDecrementBCommand = new Command(() => FoulsB--);
+        FoulsDecrementACommand = new Command(() =>
+        {
+            FoulsA--;
+            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
+            if (foulMode == "shelf")
+            {
+                MainBallsB--;
+            }
+            else
+            {
+                MainBallsA++;
+            }
+        });
+        FoulsDecrementBCommand = new Command(() =>
+        {
+            FoulsB--;
+            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
+            if (foulMode == "shelf")
+            {
+                MainBallsA--;
+            }
+            else
+            {
+                MainBallsB++;
+            }
+        });
     }
 
     private void StartStop()

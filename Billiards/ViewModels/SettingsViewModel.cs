@@ -4,15 +4,13 @@ using System.Windows.Input;
 using Billiards.Abstractions;
 using Billiards.Enum;
 using Billiards.ModelAndDto;
+using Billiards.Utils;
 using CommunityToolkit.Maui.Storage;
 
 namespace Billiards.ViewModels;
 
 public class SettingsViewModel : BaseViewModel
 {
-    private const string ThemeKey = "theme";
-    private const string SoundsKey = "sounds_enabled";
-
     private readonly IPlayersStore _playersStore;
     private readonly IMatchesStore _matchesStore;
 
@@ -25,9 +23,6 @@ public class SettingsViewModel : BaseViewModel
     {
         WriteIndented = true
     };
-
-    public ICommand ExportDataCommand { get; }
-    public ICommand ImportDataCommand { get; }
 
     public bool IsDarkTheme
     {
@@ -48,12 +43,89 @@ public class SettingsViewModel : BaseViewModel
         get => _isSoundsEnabled;
         set
         {
-            if (SetProperty(ref _isSoundsEnabled, value))
+            Preferences.Default.Set(Const.SoundsKey, value);
+            SetProperty(ref _isSoundsEnabled, value);
+        }
+    }
+
+    private bool _isNegativeScore;
+    public bool IsNegativeScore
+    {
+        get => _isNegativeScore;
+        set
+        {
+            if (SetProperty(ref _isNegativeScore, value))
             {
-                Preferences.Default.Set(SoundsKey, value);
+                Preferences.Default.Set(Const.NegativeScore, value.ToString());
             }
         }
     }
+
+    private bool _minusRandomBalls;
+    public bool MinusRandomBalls
+    {
+        get => _minusRandomBalls;
+        set
+        {
+            if (SetProperty(ref _minusRandomBalls, value))
+            {
+                Preferences.Default.Set(Const.MinusRandomBalls, value.ToString());
+                _ = _matchesStore.ReloadAsync();
+            }
+        }
+    }
+
+    private string _foulMode = Const.ModeShelf;
+    private bool _guard;
+
+    public bool IsFoulToShelf
+    {
+        get => _foulMode == Const.ModeShelf;
+        set
+        {
+            if (_guard)
+            {
+                return;
+            }
+
+            if (value)
+            {
+                SetFoulMode(Const.ModeShelf);
+                return;
+            }
+
+            if (_foulMode == Const.ModeShelf)
+            {
+                SetFoulMode(Const.ModeTable);
+            }
+        }
+    }
+
+    public bool IsFoulToTable
+    {
+        get => _foulMode == Const.ModeTable;
+        set
+        {
+            if (_guard)
+            {
+                return;
+            }
+
+            if (value)
+            {
+                SetFoulMode(Const.ModeTable);
+                return;
+            }
+
+            if (_foulMode == Const.ModeTable)
+            {
+                SetFoulMode(Const.ModeShelf);
+            }
+        }
+    }
+
+    public ICommand ExportDataCommand { get; }
+    public ICommand ImportDataCommand { get; }
 
     public ICommand AddPlayerCommand { get; }
     public ICommand DeletePlayerCommand { get; }
@@ -73,7 +145,7 @@ public class SettingsViewModel : BaseViewModel
         ExportDataCommand = new Command(async () => await ExportDataAsync());
         ImportDataCommand = new Command(async () => await ImportDataAsync());
 
-        _isSoundsEnabled = Preferences.Default.Get(SoundsKey, false);
+        _isSoundsEnabled = Preferences.Default.Get(Const.SoundsKey, false);
 
         AddPlayerCommand = new Command(async () => await AddPlayerAsync());
         DeletePlayerCommand = new Command(async () => await DeletePlayerAsync());
@@ -82,6 +154,43 @@ public class SettingsViewModel : BaseViewModel
         OpenGithubCommand = new Command(async () => await OpenUrlAsync("https://github.com/SergeySeptember"));
         OpenTelegramCommand = new Command(async () => await OpenUrlAsync("https://t.me/Sergey_September"));
         OpenRulesCommand = new Command(async () => await OpenUrlAsync("https://www.fbsrf.ru/sites/default/files/04-novaya_redakciya_pravil_piramidy_2025-09.pdf"));
+
+        LoadFoulModeSettings();
+        LoadMinusRandomBallsSettings();
+    }
+
+    private void SetFoulMode(string mode)
+    {
+        if (_foulMode == mode)
+        {
+            return;
+        }
+
+        _foulMode = mode;
+
+        _guard = true;
+        OnPropertyChanged(nameof(IsFoulToShelf));
+        OnPropertyChanged(nameof(IsFoulToTable));
+        _guard = false;
+
+        Preferences.Default.Set(Const.FoulModeKey, _foulMode);
+    }
+
+    private void LoadMinusRandomBallsSettings()
+    {
+        var saved = Preferences.Default.Get(Const.MinusRandomBalls, "false");
+        MinusRandomBalls = saved == "true";
+
+        OnPropertyChanged(nameof(MinusRandomBalls));
+    }
+
+    private void LoadFoulModeSettings()
+    {
+        var saved = Preferences.Default.Get(Const.FoulModeKey, Const.ModeShelf);
+        _foulMode = saved == Const.ModeTable ? Const.ModeTable : Const.ModeShelf;
+
+        OnPropertyChanged(nameof(IsFoulToShelf));
+        OnPropertyChanged(nameof(IsFoulToTable));
     }
 
     private async Task ExportDataAsync()
@@ -172,7 +281,7 @@ public class SettingsViewModel : BaseViewModel
         }
 
         app.UserAppTheme = _isDarkTheme ? AppTheme.Dark : AppTheme.Light;
-        Preferences.Default.Set(ThemeKey, _isDarkTheme ? "dark" : "light");
+        Preferences.Default.Set(Const.ThemeKey, _isDarkTheme ? "dark" : "light");
     }
 
     public void SyncThemeWithSystemIfNotSet()
@@ -183,9 +292,9 @@ public class SettingsViewModel : BaseViewModel
             return;
         }
 
-        if (Preferences.Default.ContainsKey(ThemeKey))
+        if (Preferences.Default.ContainsKey(Const.ThemeKey))
         {
-            IsDarkTheme = Preferences.Default.Get(ThemeKey, "light") == "dark";
+            IsDarkTheme = Preferences.Default.Get(Const.ThemeKey, "light") == "dark";
             app.UserAppTheme = IsDarkTheme ? AppTheme.Dark : AppTheme.Light;
         }
         else

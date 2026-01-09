@@ -2,6 +2,7 @@
 using Billiards.Abstractions;
 using Billiards.DataBase.Entities;
 using Billiards.ModelAndDto;
+using Billiards.Utils;
 
 namespace Billiards.ViewModels;
 
@@ -124,20 +125,47 @@ public class StatsByDaysViewModel : BaseViewModel
         var firstPlayerMatchWin = 0;
         var secondPlayerMatchWin = 0;
 
+        var firstAccidental = 0;
+        var secondAccidental = 0;
+
+        var firstFouls = 0;
+        var secondFouls = 0;
+
         foreach (var match in matches)
         {
             if (match.WinnerPlayer == firstPlayerName)
             {
-                firstPlayerPoints += match.BallsWinnerPlayer - match.FoulsBallsWinnerPlayer;
-                secondPlayerPoints += match.BallsLosePlayer - match.FoulsBallsLosePlayer;
                 firstPlayerMatchWin++;
+
+                firstPlayerPoints += match.BallsWinnerPlayer;
+                secondPlayerPoints += match.BallsLosePlayer;
+
+                firstAccidental += match.AccidentalBallsWinnerPlayer;
+                secondAccidental += match.AccidentalBallsLosePlayer;
+
+                firstFouls += match.FoulsBallsWinnerPlayer;
+                secondFouls += match.FoulsBallsLosePlayer;
             }
             else
             {
-                secondPlayerPoints += match.BallsWinnerPlayer - match.FoulsBallsWinnerPlayer;
-                firstPlayerPoints += match.BallsLosePlayer - match.FoulsBallsLosePlayer;
                 secondPlayerMatchWin++;
+
+                secondPlayerPoints += match.BallsWinnerPlayer;
+                firstPlayerPoints += match.BallsLosePlayer;
+
+                secondAccidental += match.AccidentalBallsWinnerPlayer;
+                firstAccidental += match.AccidentalBallsLosePlayer;
+
+                secondFouls += match.FoulsBallsWinnerPlayer;
+                firstFouls += match.FoulsBallsLosePlayer;
             }
+        }
+
+        var minusRandomBalls = Preferences.Default.Get(Const.MinusRandomBalls, "false");
+        if (string.Equals(minusRandomBalls, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            firstPlayerPoints -= firstAccidental;
+            secondPlayerPoints -= secondAccidental;
         }
 
         var avgTime = TimeSpan.FromSeconds(
@@ -155,6 +183,14 @@ public class StatsByDaysViewModel : BaseViewModel
             ? $"{firstPlayerMatchWin}:{secondPlayerMatchWin} ({firstPlayerPoints}:{secondPlayerPoints})"
             : $"{secondPlayerMatchWin}:{firstPlayerMatchWin} ({secondPlayerPoints}:{firstPlayerPoints})";
 
+        var accidental = firstIsWinner
+            ? $"{firstAccidental}:{secondAccidental}"
+            : $"{secondAccidental}:{firstAccidental}";
+
+        var fouls = firstIsWinner
+            ? $"{firstFouls}:{secondFouls}"
+            : $"{secondFouls}:{firstFouls}";
+
         return new()
         {
             MatchNo = "Σ",
@@ -162,8 +198,8 @@ public class StatsByDaysViewModel : BaseViewModel
             Loser = loser,
             Score = score,
             Time = FormatTime(avgTime),
-            Fouls = "", // Todo:
-            Accidental = "" // Todo:
+            Accidental = accidental,
+            Fouls = fouls
         };
     }
 

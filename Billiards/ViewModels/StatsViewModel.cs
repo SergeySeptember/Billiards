@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Billiards.Abstractions;
 using Billiards.DataBase.Entities;
 using Billiards.ModelAndDto;
+using Billiards.Utils;
 
 namespace Billiards.ViewModels;
 
@@ -125,20 +126,38 @@ public class StatsViewModel : BaseViewModel
         var firstPlayerMatchWin = 0;
         var secondPlayerMatchWin = 0;
 
+        var firstAccidental = 0;
+        var secondAccidental = 0;
+
         foreach (var match in matches)
         {
             if (match.WinnerPlayer == firstPlayerName)
             {
-                firstPlayerPoints = firstPlayerPoints + match.BallsWinnerPlayer - match.FoulsBallsWinnerPlayer;
-                secondPlayerPoints = secondPlayerPoints + match.BallsLosePlayer - match.FoulsBallsLosePlayer;
                 firstPlayerMatchWin++;
+
+                firstPlayerPoints += match.BallsWinnerPlayer;
+                secondPlayerPoints += match.BallsLosePlayer;
+
+                firstAccidental += match.AccidentalBallsWinnerPlayer;
+                secondAccidental += match.AccidentalBallsLosePlayer;
             }
             else
             {
-                secondPlayerPoints = secondPlayerPoints + match.BallsWinnerPlayer - match.FoulsBallsWinnerPlayer;
-                firstPlayerPoints = firstPlayerPoints + match.BallsLosePlayer - match.FoulsBallsLosePlayer;
                 secondPlayerMatchWin++;
+
+                secondPlayerPoints += match.BallsWinnerPlayer;
+                firstPlayerPoints += match.BallsLosePlayer;
+
+                secondAccidental += match.AccidentalBallsWinnerPlayer;
+                firstAccidental += match.AccidentalBallsLosePlayer;
             }
+        }
+
+        var minusRandomBalls = Preferences.Default.Get(Const.MinusRandomBalls, "false");
+        if (string.Equals(minusRandomBalls, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            firstPlayerPoints -= firstAccidental;
+            secondPlayerPoints -= secondAccidental;
         }
 
         var avgTime = TimeSpan.FromSeconds(matches.Select(m => TryParseTime(m.MatchTime).TotalSeconds).Average());
