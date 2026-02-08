@@ -209,7 +209,7 @@ public class StatsByDaysViewModel : BaseViewModel
     private static string FormatTime(TimeSpan ts)
         => $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
 
-    private readonly record struct PlayerPair(string A, string B);
+    private readonly record struct PlayerPair(string P1, string P2);
 
     private static PlayerPair MakePair(string p1, string p2)
         => string.Compare(p1, p2, StringComparison.CurrentCultureIgnoreCase) <= 0

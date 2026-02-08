@@ -137,7 +137,13 @@ public class MatchViewModel : BaseViewModel
     public int AccidentalBallsA
     {
         get => _accidentalBallsA;
-        set => SetProperty(ref _accidentalBallsA, value);
+        set
+        {
+            if (value >= 0)
+            {
+                SetProperty(ref _accidentalBallsA, value);
+            }
+        }
     }
 
     private int _accidentalBallsB;
@@ -145,7 +151,13 @@ public class MatchViewModel : BaseViewModel
     public int AccidentalBallsB
     {
         get => _accidentalBallsB;
-        set => SetProperty(ref _accidentalBallsB, value);
+        set
+        {
+            if (value >= 0)
+            {
+                SetProperty(ref _accidentalBallsB, value);
+            }
+        }
     }
 
     private int _foulsA;
@@ -153,7 +165,13 @@ public class MatchViewModel : BaseViewModel
     public int FoulsA
     {
         get => _foulsA;
-        set => SetProperty(ref _foulsA, value);
+        set
+        {
+            if (value >= 0)
+            {
+                SetProperty(ref _foulsA, value);
+            }
+        }
     }
 
     private int _foulsB;
@@ -161,7 +179,13 @@ public class MatchViewModel : BaseViewModel
     public int FoulsB
     {
         get => _foulsB;
-        set => SetProperty(ref _foulsB, value);
+        set
+        {
+            if (value >= 0)
+            {
+                SetProperty(ref _foulsB, value);
+            }
+        }
     }
 
     // ----- Таймер -----
@@ -228,15 +252,31 @@ public class MatchViewModel : BaseViewModel
         AccidentalBallsIncrementACommand = new Command(() =>
         {
             AccidentalBallsA++;
-            _ = soundService.PlayAsync(SoundId.AccidentalPlus);
+            MainBallsA++;
+            soundService.PlayAsync(SoundId.AccidentalPlus);
         });
         AccidentalBallsIncrementBCommand = new Command(() =>
         {
             AccidentalBallsB++;
-            _ = soundService.PlayAsync(SoundId.AccidentalPlus);
+            MainBallsB++;
+            soundService.PlayAsync(SoundId.AccidentalPlus);
         });
-        AccidentalBallsDecrementACommand = new Command(() => AccidentalBallsA--);
-        AccidentalBallsDecrementBCommand = new Command(() => AccidentalBallsB--);
+        AccidentalBallsDecrementACommand = new Command(() =>
+        {
+            if (AccidentalBallsA > 0)
+            {
+                AccidentalBallsA--;
+                MainBallsA--;
+            }
+        });
+        AccidentalBallsDecrementBCommand = new Command(() =>
+        {
+            if (AccidentalBallsB > 0)
+            {
+                AccidentalBallsB--;
+                MainBallsB--;
+            }
+        });
 
         FoulsIncrementACommand = new Command(() =>
         {
@@ -250,7 +290,7 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsA--;
             }
-            _ = soundService.PlayAsync(SoundId.Fall);
+            soundService.PlayAsync(SoundId.Fall);
         });
         FoulsIncrementBCommand = new Command(() =>
         {
@@ -264,7 +304,7 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsB--;
             }
-            _ = soundService.PlayAsync(SoundId.Fall);
+            soundService.PlayAsync(SoundId.Fall);
         });
         FoulsDecrementACommand = new Command(() =>
         {

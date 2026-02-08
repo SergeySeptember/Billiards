@@ -70,7 +70,7 @@ public class SettingsViewModel : BaseViewModel
             if (SetProperty(ref _minusRandomBalls, value))
             {
                 Preferences.Default.Set(Const.MinusRandomBalls, value.ToString());
-                _ = _matchesStore.ReloadAsync();
+                _matchesStore.ReloadAsync();
             }
         }
     }
@@ -322,7 +322,7 @@ public class SettingsViewModel : BaseViewModel
 
         name = name.Trim();
         await _playersStore.AddAsync(name);
-        _ = _soundService.PlayAsync(SoundId.FreshMeat);
+        _soundService.PlayAsync(SoundId.FreshMeat);
         await page.DisplayAlert("Готово", $"Игрок добавлен: {name}", "Ок");
     }
 
