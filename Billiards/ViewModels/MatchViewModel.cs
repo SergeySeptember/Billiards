@@ -243,9 +243,17 @@ public class MatchViewModel : BaseViewModel
         ToggleBreakShotCommand = new Command<Player?>(ToggleBreakShot);
         ClearBreakShotCommand = new Command(() => BreakShotPlayerName = null);
 
-        MainBallsIncrementACommand = new Command(() => MainBallsA++);
+        MainBallsIncrementACommand = new Command(() =>
+        {
+            MainBallsA++;
+            soundService.PlayAsync(SoundId.Shot);
+        });
         MainBallsDecrementACommand = new Command(() => MainBallsA--);
-        MainBallsIncrementBCommand = new Command(() => MainBallsB++);
+        MainBallsIncrementBCommand = new Command(() =>
+        {
+            MainBallsB++;
+            soundService.PlayAsync(SoundId.Shot);
+        });
         MainBallsDecrementBCommand = new Command(() => MainBallsB--);
 
 
@@ -529,6 +537,28 @@ public class MatchViewModel : BaseViewModel
         if (player?.Name is null)
         {
             return;
+        }
+        if (BreakShotPlayerName is null)
+        {
+            if (player.Name == PlayerA?.Name)
+            {
+                MainBallsA++;
+            }
+            else if (player.Name == PlayerB?.Name)
+            {
+                MainBallsB++;
+            }
+        }
+        if (BreakShotPlayerName is not null)
+        {
+            if (player.Name == PlayerA?.Name)
+            {
+                MainBallsA--;
+            }
+            else if (player.Name == PlayerB?.Name)
+            {
+                MainBallsB--;
+            }
         }
 
         BreakShotPlayerName = BreakShotPlayerName == player.Name ? null : player.Name;

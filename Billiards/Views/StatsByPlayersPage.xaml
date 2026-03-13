@@ -43,6 +43,13 @@
                FontAttributes="Bold"
                HorizontalOptions="Center" />
 
+        <Label Grid.Row="1"
+               Text="{Binding AverageMatchTimeText}"
+               FontSize="12"
+               HorizontalOptions="Center"
+               HorizontalTextAlignment="Center"
+               Opacity="0.8" />
+
         <Label Grid.Row="2"
                Text="Данных пока нет"
                IsVisible="{Binding IsEmptyVisible}"
@@ -56,8 +63,7 @@
 
             <VerticalStackLayout Spacing="0">
 
-                <!-- Header -->
-                <Grid ColumnDefinitions="130,40,70,60,70,130"
+                <Grid ColumnDefinitions="130,40,70,60,70,100,90,100"
                       ColumnSpacing="0"
                       RowSpacing="0">
 
@@ -82,12 +88,24 @@
                     </Border>
 
                     <Border Grid.Column="5" Style="{StaticResource HeaderBorderStyle}">
-                        <Label Text="Забитие с разбоя" HorizontalTextAlignment="Center"
+                        <Label Text="Забитие с разбоя"
+                               HorizontalTextAlignment="Center"
+                               Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="6" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Выиграно в сухую"
+                               HorizontalTextAlignment="Center"
+                               Style="{StaticResource HeaderLabel}" />
+                    </Border>
+
+                    <Border Grid.Column="7" Style="{StaticResource HeaderBorderStyle}">
+                        <Label Text="Проиграно в сухую"
+                               HorizontalTextAlignment="Center"
                                Style="{StaticResource HeaderLabel}" />
                     </Border>
                 </Grid>
 
-                <!-- Rows -->
                 <CollectionView ItemsSource="{Binding Rows}"
                                 SelectionMode="None"
                                 VerticalOptions="Fill">
@@ -98,7 +116,7 @@
 
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="dto:PlayerStats">
-                            <Grid ColumnDefinitions="130,40,70,60,70,130"
+                            <Grid ColumnDefinitions="130,40,70,60,70,100,90,100"
                                   ColumnSpacing="0"
                                   RowSpacing="0">
 
@@ -133,6 +151,18 @@
 
                                 <Border Grid.Column="5" Style="{StaticResource CellBorder}">
                                     <Label Text="{Binding BreakShot}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="6" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding DryWins}"
+                                           HorizontalTextAlignment="Center"
+                                           Style="{StaticResource CellLabel}" />
+                                </Border>
+
+                                <Border Grid.Column="7" Style="{StaticResource CellBorder}">
+                                    <Label Text="{Binding DryLosses}"
                                            HorizontalTextAlignment="Center"
                                            Style="{StaticResource CellLabel}" />
                                 </Border>

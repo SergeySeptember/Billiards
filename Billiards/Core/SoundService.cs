@@ -11,8 +11,9 @@ public sealed class SoundService(IAudioManager audioManager) : ISoundService
     private static readonly Dictionary<SoundId, string> Map = new()
     {
         [SoundId.FreshMeat] = "fresh_meat.mp3",
-        [SoundId.AccidentalPlus] = "accidental_plus.mp3",
-        [SoundId.Fall] = "fall.mp3"
+        [SoundId.AccidentalPlus] = "sorry.mp3",
+        [SoundId.Fall] = "fall.mp3",
+        [SoundId.Shot] = "shot.mp3"
     };
 
     public async Task PlayAsync(SoundId id)

@@ -12,6 +12,14 @@ public class StatsByPlayersViewModel : BaseViewModel
 
     public ObservableCollection<PlayerStats> Rows { get; } = new();
 
+    private string _averageMatchTimeText = "Среднее время игр за все время: 00:00:00";
+
+    public string AverageMatchTimeText
+    {
+        get => _averageMatchTimeText;
+        set => SetProperty(ref _averageMatchTimeText, value);
+    }
+
     private bool _isEmptyVisible;
 
     public bool IsEmptyVisible
@@ -42,6 +50,11 @@ public class StatsByPlayersViewModel : BaseViewModel
     {
         Rows.Clear();
 
+        var matches = await _matchStatsRepository.GetAllAsync();
+        var averageMatchTime = TimeSpan.FromSeconds(
+            matches.Select(m => TryParseTime(m.MatchTime).TotalSeconds).DefaultIfEmpty(0).Average());
+        AverageMatchTimeText = $"Среднее время игр за все время: {FormatTime(averageMatchTime)}";
+
         var players = await _playerRepository.GetAllAsync();
         if (players.Count == 0)
         {
@@ -50,7 +63,6 @@ public class StatsByPlayersViewModel : BaseViewModel
             return;
         }
 
-        var matches = await _matchStatsRepository.GetAllAsync();
         var playerNames = players.Select(p => p.Name).ToList();
 
         foreach (var name in playerNames)
@@ -78,6 +90,16 @@ public class StatsByPlayersViewModel : BaseViewModel
                 !string.IsNullOrWhiteSpace(m.BreakShotPlayer) &&
                 string.Equals(m.BreakShotPlayer, name, StringComparison.CurrentCultureIgnoreCase));
 
+            var dryWins = pm.Count(m =>
+                string.Equals(m.WinnerPlayer, name, StringComparison.CurrentCultureIgnoreCase) &&
+                m.BallsWinnerPlayer == 8 &&
+                m.BallsLosePlayer == 0);
+
+            var dryLosses = pm.Count(m =>
+                string.Equals(m.LosePlayer, name, StringComparison.CurrentCultureIgnoreCase) &&
+                m.BallsWinnerPlayer == 8 &&
+                m.BallsLosePlayer == 0);
+
             Rows.Add(new()
             {
                 PlayerName = name,
@@ -85,11 +107,19 @@ public class StatsByPlayersViewModel : BaseViewModel
                 WinRate = played == 0 ? 0 : (double)wins / played * 100.0,
                 AccidentalBalls = accidental,
                 FoulsBalls = fouls,
-                BreakShot = breakShot
+                BreakShot = breakShot,
+                DryWins = dryWins,
+                DryLosses = dryLosses
             });
         }
 
         IsEmptyVisible = Rows.Count == 0;
         IsTableVisible = Rows.Count > 0;
     }
+
+    private static TimeSpan TryParseTime(string? text)
+        => TimeSpan.TryParse(text, out var ts) ? ts : TimeSpan.Zero;
+
+    private static string FormatTime(TimeSpan ts)
+        => $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
 }
