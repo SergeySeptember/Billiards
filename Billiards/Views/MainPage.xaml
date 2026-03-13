@@ -1,36 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ContentPage
     x:Class="Billiards.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:views="clr-namespace:Billiards.Views"
+    xmlns:modelAndDto="clr-namespace:Billiards.ModelAndDto"
     xmlns:viewModels="clr-namespace:Billiards.ViewModels"
     x:DataType="viewModels:MainViewModel">
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-
-            <DataTemplate x:Key="SettingsTemplate">
-                <views:SettingsView />
-            </DataTemplate>
-
-            <DataTemplate x:Key="MatchTemplate">
-                <views:MatchView />
-            </DataTemplate>
-
-            <DataTemplate x:Key="StatsTemplate">
-                <views:StatsView />
-            </DataTemplate>
-
-            <views:MainCarouselTemplateSelector x:Key="MainCarouselTemplateSelector"
-                                                SettingsTemplate="{StaticResource SettingsTemplate}"
-                                                MatchTemplate="{StaticResource MatchTemplate}"
-                                                StatsTemplate="{StaticResource StatsTemplate}" />
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
     <CarouselView ItemsSource="{Binding Pages}"
-                  ItemTemplate="{StaticResource MainCarouselTemplateSelector}"
                   Position="{Binding CurrentIndex}"
-                  IsSwipeEnabled="True" />
+                  IsSwipeEnabled="True">
+        <CarouselView.ItemTemplate>
+            <DataTemplate x:DataType="modelAndDto:MainCarouselItem">
+                <ContentView Content="{Binding Content}" />
+            </DataTemplate>
+        </CarouselView.ItemTemplate>
+    </CarouselView>
 </ContentPage>

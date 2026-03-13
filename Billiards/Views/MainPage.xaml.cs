@@ -1,10 +1,12 @@
-﻿using Billiards.Abstractions;
+using Billiards.Abstractions;
 using Billiards.ViewModels;
 
 namespace Billiards;
 
 public partial class MainPage : ContentPage
 {
+    private bool _isInitialized;
+
     public MainPage(MainViewModel mainViewModel, IPlayersStore players, IMatchesStore matches, SettingsViewModel settingsViewModel)
     {
         InitializeComponent();
@@ -12,9 +14,14 @@ public partial class MainPage : ContentPage
 
         Loaded += async (_, _) =>
         {
-            await players.ReloadAsync();
-            await matches.ReloadAsync();
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            _isInitialized = true;
             settingsViewModel.SyncThemeWithSystemIfNotSet();
+            await Task.WhenAll(players.ReloadAsync(), matches.ReloadAsync());
         };
     }
 }

@@ -32,11 +32,14 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainPage>();
-        builder.Services.AddSingleton<MainCarouselTemplateSelector>();
 
         builder.Services.AddSingleton<MatchViewModel>();
         builder.Services.AddSingleton<SettingsViewModel>();
         builder.Services.AddSingleton<StatsViewModel>();
+
+        builder.Services.AddSingleton<MatchView>();
+        builder.Services.AddSingleton<SettingsView>();
+        builder.Services.AddSingleton<StatsView>();
 
         builder.Services.AddTransient<StatsByDaysPage>();
         builder.Services.AddTransient<StatsByDaysViewModel>();

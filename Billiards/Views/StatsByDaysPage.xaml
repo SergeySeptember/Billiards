@@ -54,7 +54,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-
     </ContentPage.Resources>
 
     <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
@@ -64,9 +63,10 @@
                    FontAttributes="Bold"
                    VerticalTextAlignment="Center" />
 
-            <DatePicker Grid.Column="1"
-                        Date="{Binding SelectedDate}"
-                        HorizontalOptions="End" />
+            <Button Grid.Column="1"
+                    Text="{Binding SelectedDateText}"
+                    HorizontalOptions="End"
+                    Clicked="OnPickDateClicked" />
         </Grid>
 
         <Label Grid.Row="1"
@@ -81,7 +81,6 @@
             <Grid RowDefinitions="Auto,*"
                   RowSpacing="0">
 
-                <!-- Header -->
                 <Grid Grid.Row="0"
                       ColumnSpacing="0"
                       RowSpacing="0"
@@ -128,7 +127,6 @@
                     </Border>
                 </Grid>
 
-                <!-- Rows -->
                 <CollectionView Grid.Row="1"
                                 ItemsSource="{Binding Rows}"
                                 SelectionMode="None"

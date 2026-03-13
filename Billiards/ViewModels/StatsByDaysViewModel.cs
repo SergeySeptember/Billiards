@@ -21,10 +21,19 @@ public class StatsByDaysViewModel : BaseViewModel
         {
             if (SetProperty(ref _selectedDate, value))
             {
+                OnPropertyChanged(nameof(SelectedDateText));
                 RebuildRows();
             }
         }
     }
+
+    public string SelectedDateText => SelectedDate.ToString("dd.MM.yyyy");
+
+    public IReadOnlyList<DateTime> DatesWithMatches => _matchesStore.Matches
+        .Select(m => m.CurrentDateTime.Date)
+        .Distinct()
+        .OrderBy(d => d)
+        .ToList();
 
     public bool IsTableVisible => Rows.Count > 0;
 
@@ -39,7 +48,11 @@ public class StatsByDaysViewModel : BaseViewModel
     public StatsByDaysViewModel(IMatchesStore matchesStore)
     {
         _matchesStore = matchesStore;
-        _matchesStore.Matches.CollectionChanged += (_, _) => RebuildRows();
+        _matchesStore.Matches.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(DatesWithMatches));
+            RebuildRows();
+        };
         RebuildRows();
     }
 
