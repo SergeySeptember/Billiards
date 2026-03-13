@@ -1,32 +1,16 @@
 using System.Collections.ObjectModel;
-using Billiards.ModelAndDto;
-using Billiards.Views;
 
 namespace Billiards.ViewModels;
 
-public class MainViewModel : BaseViewModel
+public class MainViewModel(SettingsViewModel settingsVm, MatchViewModel matchVm, StatsViewModel statsVm)
+    : BaseViewModel
 {
-    public ObservableCollection<MainCarouselItem> Pages { get; }
-
-    public MainViewModel(
-        SettingsViewModel settingsVm,
-        MatchViewModel matchVm,
-        StatsViewModel statsVm,
-        SettingsView settingsView,
-        MatchView matchView,
-        StatsView statsView)
+    public ObservableCollection<object> Pages { get; } = new()
     {
-        settingsView.BindingContext = settingsVm;
-        matchView.BindingContext = matchVm;
-        statsView.BindingContext = statsVm;
-
-        Pages = new()
-        {
-            new(settingsView),
-            new(matchView),
-            new(statsView)
-        };
-    }
+        settingsVm,
+        matchVm,
+        statsVm
+    };
 
     private int _currentIndex = 1;
 

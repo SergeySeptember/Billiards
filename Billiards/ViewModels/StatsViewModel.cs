@@ -4,12 +4,14 @@ using Billiards.Abstractions;
 using Billiards.DataBase.Entities;
 using Billiards.ModelAndDto;
 using Billiards.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Billiards.ViewModels;
 
 public class StatsViewModel : BaseViewModel
 {
     private readonly IMatchesStore _matchesStore;
+    private readonly IServiceProvider _services;
 
     public ObservableCollection<StatsRow> Rows { get; } = new();
 
@@ -29,9 +31,10 @@ public class StatsViewModel : BaseViewModel
     public ICommand OpenByDaysCommand { get; }
     public ICommand OpenByPlayersCommand { get; }
 
-    public StatsViewModel(IMatchesStore matchesStore)
+    public StatsViewModel(IMatchesStore matchesStore, IServiceProvider services)
     {
         _matchesStore = matchesStore;
+        _services = services;
 
         Rows.CollectionChanged += (_, _) =>
         {
@@ -46,17 +49,19 @@ public class StatsViewModel : BaseViewModel
 
         OpenByDaysCommand = new Command(async () =>
         {
-            if (Shell.Current is not null)
+            var navigation = PageResolver.Navigation;
+            if (navigation is not null)
             {
-                await Shell.Current.GoToAsync(nameof(Views.StatsByDaysPage));
+                await navigation.PushAsync(_services.GetRequiredService<Views.StatsByDaysPage>());
             }
         });
 
         OpenByPlayersCommand = new Command(async () =>
         {
-            if (Shell.Current is not null)
+            var navigation = PageResolver.Navigation;
+            if (navigation is not null)
             {
-                await Shell.Current.GoToAsync(nameof(Views.StatsByPlayersPage));
+                await navigation.PushAsync(_services.GetRequiredService<Views.StatsByPlayersPage>());
             }
         });
     }
@@ -167,6 +172,7 @@ public class StatsViewModel : BaseViewModel
             var isFirstPlayerWin = firstPlayerPoints > secondPlayerPoints;
             return new()
             {
+                IsSummary = true,
                 MatchNo = "Σ",
                 Winner = isFirstPlayerWin ? firstPlayerName : secondPlayerName,
                 Loser = isFirstPlayerWin ? secondPlayerName : firstPlayerName,
@@ -179,6 +185,7 @@ public class StatsViewModel : BaseViewModel
             var isFirstPlayerWin = firstPlayerMatchWin > secondPlayerMatchWin;
             return new()
             {
+                IsSummary = true,
                 MatchNo = "Σ",
                 Winner = isFirstPlayerWin ? firstPlayerName : secondPlayerName,
                 Loser = isFirstPlayerWin ? secondPlayerName : firstPlayerName,

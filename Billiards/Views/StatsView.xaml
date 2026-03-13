@@ -30,6 +30,7 @@
 
         <Style x:Key="TableCellLabelStyle" TargetType="Label">
             <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontAttributes" Value="None" />
             <Setter Property="LineBreakMode" Value="WordWrap" />
             <Setter Property="MaxLines" Value="2" />
             <Setter Property="HorizontalTextAlignment" Value="Center" />
@@ -37,9 +38,23 @@
 
             <Style.Triggers>
                 <DataTrigger TargetType="Label"
-                             Binding="{Binding MatchNo}"
-                             Value="Σ">
+                             Binding="{Binding IsSummary}"
+                             Value="True">
                     <Setter Property="FontAttributes" Value="Bold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SummaryTableCellBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource TableCellBorderStyle}">
+            <Setter Property="BackgroundColor" Value="Transparent" />
+
+            <Style.Triggers>
+                <DataTrigger TargetType="Border"
+                             Binding="{Binding IsSummary}"
+                             Value="True">
+                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -47,40 +62,38 @@
     </ContentView.Resources>
 
     <Grid Padding="16"
-      RowSpacing="10"
-      RowDefinitions="Auto,Auto,Auto,*,Auto">
+          RowSpacing="10"
+          RowDefinitions="Auto,Auto,Auto,*,Auto">
 
         <Label Grid.Row="0"
-           Text="Статистика"
-           FontSize="20"
-           FontAttributes="Bold"
-           HorizontalOptions="Center" />
+               Text="Статистика"
+               FontSize="20"
+               FontAttributes="Bold"
+               HorizontalOptions="Center" />
 
         <Label Grid.Row="1"
-           Text="{Binding MatchesCountText}"
-           FontSize="14"
-           HorizontalOptions="Center"
-           Opacity="0.8" />
+               Text="{Binding MatchesCountText}"
+               FontSize="14"
+               HorizontalOptions="Center"
+               Opacity="0.8" />
 
         <Label Grid.Row="2"
-           Text="За сегодня матчей нет"
-           IsVisible="{Binding IsEmptyVisible}"
-           HorizontalOptions="Center"
-           FontSize="16"
-           Opacity="0.8"
-           Margin="0,20,0,0" />
+               Text="За сегодня матчей нет"
+               IsVisible="{Binding IsEmptyVisible}"
+               HorizontalOptions="Center"
+               FontSize="16"
+               Opacity="0.8"
+               Margin="0,20,0,0" />
 
-        <!-- Таблица -->
         <Grid Grid.Row="3"
-          IsVisible="{Binding IsTableVisible}"
-          RowDefinitions="Auto,*"
-          RowSpacing="0">
-
-            <!-- Header -->
-            <Grid Grid.Row="0"
-              ColumnDefinitions="35,95,110,60,75"
-              ColumnSpacing="0"
+              IsVisible="{Binding IsTableVisible}"
+              RowDefinitions="Auto,*"
               RowSpacing="0">
+
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="35,95,110,60,75"
+                  ColumnSpacing="0"
+                  RowSpacing="0">
 
                 <Border Style="{StaticResource HeaderBorderStyle}">
                     <Label Text="№" Style="{StaticResource TableHeaderLabelStyle}" />
@@ -104,10 +117,9 @@
             </Grid>
 
             <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding Rows}"
-                        SelectionMode="None"
-                        VerticalOptions="Fill"
-                        Margin="0,0,0,0">
+                            ItemsSource="{Binding Rows}"
+                            SelectionMode="None"
+                            VerticalOptions="Fill">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
                 </CollectionView.ItemsLayout>
@@ -115,38 +127,39 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="modelAndDto:StatsRow">
                         <Grid ColumnDefinitions="35,95,110,60,75"
-                          ColumnSpacing="0"
-                          RowSpacing="0">
+                              ColumnSpacing="0"
+                              Margin="0"
+                              RowSpacing="0">
 
                             <Grid.Triggers>
-                                <DataTrigger TargetType="Grid" Binding="{Binding MatchNo}" Value="Σ">
+                                <DataTrigger TargetType="Grid" Binding="{Binding IsSummary}" Value="True">
                                     <Setter Property="Margin" Value="0,0,0,12" />
                                 </DataTrigger>
                             </Grid.Triggers>
 
-                            <Border Style="{StaticResource TableCellBorderStyle}">
+                            <Border Style="{StaticResource SummaryTableCellBorderStyle}">
                                 <Label Text="{Binding MatchNo}"
-                                   Style="{StaticResource TableCellLabelStyle}" />
+                                       Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="1" Style="{StaticResource TableCellBorderStyle}">
+                            <Border Grid.Column="1" Style="{StaticResource SummaryTableCellBorderStyle}">
                                 <Label Text="{Binding Winner}"
-                                   Style="{StaticResource TableCellLabelStyle}" />
+                                       Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="2" Style="{StaticResource TableCellBorderStyle}">
+                            <Border Grid.Column="2" Style="{StaticResource SummaryTableCellBorderStyle}">
                                 <Label Text="{Binding Loser}"
-                                   Style="{StaticResource TableCellLabelStyle}" />
+                                       Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="3" Style="{StaticResource TableCellBorderStyle}">
+                            <Border Grid.Column="3" Style="{StaticResource SummaryTableCellBorderStyle}">
                                 <Label Text="{Binding Score}"
-                                   Style="{StaticResource TableCellLabelStyle}" />
+                                       Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
-                            <Border Grid.Column="4" Style="{StaticResource TableCellBorderStyle}">
+                            <Border Grid.Column="4" Style="{StaticResource SummaryTableCellBorderStyle}">
                                 <Label Text="{Binding Time}"
-                                   Style="{StaticResource TableCellLabelStyle}" />
+                                       Style="{StaticResource TableCellLabelStyle}" />
                             </Border>
 
                         </Grid>
@@ -157,14 +170,14 @@
         </Grid>
 
         <Grid Grid.Row="4"
-          ColumnSpacing="10"
-          ColumnDefinitions="*,*">
+              ColumnSpacing="10"
+              ColumnDefinitions="*,*">
             <Button Grid.Column="0"
-                Text="По дням"
-                Command="{Binding OpenByDaysCommand}" />
+                    Text="По дням"
+                    Command="{Binding OpenByDaysCommand}" />
             <Button Grid.Column="1"
-                Text="По игрокам"
-                Command="{Binding OpenByPlayersCommand}" />
+                    Text="По игрокам"
+                    Command="{Binding OpenByPlayersCommand}" />
         </Grid>
 
     </Grid>

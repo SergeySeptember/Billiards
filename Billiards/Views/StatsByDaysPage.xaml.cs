@@ -1,6 +1,5 @@
 using Billiards.ViewModels;
 
-#if ANDROID
 using Color = Android.Graphics.Color;
 using Android.Content;
 using Android.Content.Res;
@@ -8,7 +7,6 @@ using Android.OS;
 using AndroidX.Fragment.App;
 using Google.Android.Material.DatePicker;
 using Java.Lang;
-#endif
 
 namespace Billiards.Views;
 
@@ -25,12 +23,9 @@ public partial class StatsByDaysPage : ContentPage
 
     private void OnPickDateClicked(object? sender, EventArgs e)
     {
-#if ANDROID
         ShowAndroidDatePicker();
-#endif
     }
 
-#if ANDROID
     private void ShowAndroidDatePicker()
     {
         if (Platform.CurrentActivity is not FragmentActivity activity)
@@ -139,5 +134,4 @@ public partial class StatsByDaysPage : ContentPage
             }
         }
     }
-#endif
 }

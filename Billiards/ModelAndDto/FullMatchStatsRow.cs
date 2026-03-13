@@ -2,6 +2,7 @@
 
 public class FullMatchStatsRow
 {
+    public bool IsSummary { get; set; }
     public string MatchNo { get; set; } = string.Empty;
     public string Start { get; set; } = string.Empty;
     public string Winner { get; set; } = string.Empty;

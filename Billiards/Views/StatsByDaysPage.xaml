@@ -36,20 +36,24 @@
         </Style>
 
         <Style x:Key="RowLabelStyle" TargetType="Label" BasedOn="{StaticResource CellLabelStyle}">
+            <Setter Property="FontAttributes" Value="None" />
             <Style.Triggers>
                 <DataTrigger TargetType="Label"
-                             Binding="{Binding MatchNo}"
-                             Value="Σ">
+                             Binding="{Binding IsSummary}"
+                             Value="True">
                     <Setter Property="FontAttributes" Value="Bold" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="SummaryRowBorderStyle" TargetType="Border">
+        <Style x:Key="SummaryRowBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource CellBorderStyle}">
+            <Setter Property="BackgroundColor" Value="Transparent" />
             <Style.Triggers>
                 <DataTrigger TargetType="Border"
-                             Binding="{Binding MatchNo}"
-                             Value="Σ">
+                             Binding="{Binding IsSummary}"
+                             Value="True">
                     <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
                 </DataTrigger>
             </Style.Triggers>
@@ -140,10 +144,11 @@
                         <DataTemplate x:DataType="modelAndDto:FullMatchStatsRow">
                             <Grid ColumnSpacing="0"
                                   RowSpacing="0"
+                                  Margin="0"
                                   ColumnDefinitions="40,60,90,100,70,70,70,100,85,160">
 
                                 <Grid.Triggers>
-                                    <DataTrigger TargetType="Grid" Binding="{Binding MatchNo}" Value="Σ">
+                                    <DataTrigger TargetType="Grid" Binding="{Binding IsSummary}" Value="True">
                                         <Setter Property="Margin" Value="0,0,0,12" />
                                     </DataTrigger>
                                 </Grid.Triggers>

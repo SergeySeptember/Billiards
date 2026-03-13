@@ -197,7 +197,12 @@ public class SettingsViewModel : BaseViewModel
     {
         try
         {
-            var page = Shell.Current.CurrentPage;
+            var page = PageResolver.CurrentPage;
+            if (page is null)
+            {
+                return;
+            }
+
             var backup = await _backupService.BuildBackupAsync();
             var json = JsonSerializer.Serialize(backup, JsonOptions);
 
@@ -218,7 +223,11 @@ public class SettingsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await (Shell.Current.CurrentPage.DisplayAlert("Ошибка экспорта", ex.Message, "Ок") ?? Task.CompletedTask);
+            var page = PageResolver.CurrentPage;
+            if (page is not null)
+            {
+                await page.DisplayAlert("Ошибка экспорта", ex.Message, "Ок");
+            }
         }
     }
 
@@ -226,7 +235,12 @@ public class SettingsViewModel : BaseViewModel
     {
         try
         {
-            var page = Shell.Current.CurrentPage;
+            var page = PageResolver.CurrentPage;
+            if (page is null)
+            {
+                return;
+            }
+
             var file = await FilePicker.Default.PickAsync(new()
             {
                 PickerTitle = "Выбери JSON-бэкап"
@@ -268,7 +282,11 @@ public class SettingsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await (Shell.Current.CurrentPage.DisplayAlert("Ошибка импорта", ex.Message, "Ок") ?? Task.CompletedTask);
+            var page = PageResolver.CurrentPage;
+            if (page is not null)
+            {
+                await page.DisplayAlert("Ошибка импорта", ex.Message, "Ок");
+            }
         }
     }
 
@@ -307,7 +325,12 @@ public class SettingsViewModel : BaseViewModel
 
     private async Task AddPlayerAsync()
     {
-        var page = Shell.Current.CurrentPage;
+        var page = PageResolver.CurrentPage;
+        if (page is null)
+        {
+            return;
+        }
+
         var name = await page.DisplayPromptAsync(
             "Новый игрок",
             "Введи имя игрока",
@@ -328,7 +351,11 @@ public class SettingsViewModel : BaseViewModel
 
     private async Task DeletePlayerAsync()
     {
-        var page = Shell.Current.CurrentPage;
+        var page = PageResolver.CurrentPage;
+        if (page is null)
+        {
+            return;
+        }
 
         var names = _playersStore.Players
             .Select(p => p.Name)
@@ -378,7 +405,7 @@ public class SettingsViewModel : BaseViewModel
 
     private async Task ClearDbAsync()
     {
-        var page = Shell.Current.CurrentPage;
+        var page = PageResolver.CurrentPage;
         if (page is null)
         {
             return;
@@ -409,7 +436,7 @@ public class SettingsViewModel : BaseViewModel
         }
         catch
         {
-            var page = Shell.Current.CurrentPage;
+            var page = PageResolver.CurrentPage;
             if (page is not null)
             {
                 await page.DisplayAlert("Ошибка", "Не удалось открыть ссылку.", "Ок");

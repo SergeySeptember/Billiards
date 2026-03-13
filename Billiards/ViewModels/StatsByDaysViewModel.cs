@@ -126,7 +126,7 @@ public class StatsByDaysViewModel : BaseViewModel
     {
         if (matches.Count == 0)
         {
-            return new() { MatchNo = "Σ" };
+            return new() { IsSummary = true, MatchNo = "Σ" };
         }
 
         var firstPlayerName = matches[0].WinnerPlayer;
@@ -206,6 +206,7 @@ public class StatsByDaysViewModel : BaseViewModel
 
         return new()
         {
+            IsSummary = true,
             MatchNo = "Σ",
             Winner = winner,
             Loser = loser,

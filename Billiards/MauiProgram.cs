@@ -28,18 +28,13 @@ public static class MauiProgram
         var connectionString = $"Data Source={dbPath}";
         builder.Services.AddDbContextFactory<BilliardsDbContext>(options => options.UseSqlite(connectionString));
 
-        builder.Services.AddSingleton<AppShell>();
-
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainPage>();
+        builder.Services.AddSingleton<MainCarouselTemplateSelector>();
 
         builder.Services.AddSingleton<MatchViewModel>();
         builder.Services.AddSingleton<SettingsViewModel>();
         builder.Services.AddSingleton<StatsViewModel>();
-
-        builder.Services.AddSingleton<MatchView>();
-        builder.Services.AddSingleton<SettingsView>();
-        builder.Services.AddSingleton<StatsView>();
 
         builder.Services.AddTransient<StatsByDaysPage>();
         builder.Services.AddTransient<StatsByDaysViewModel>();
@@ -57,9 +52,6 @@ public static class MauiProgram
 
         builder.Services.AddSingleton(AudioManager.Current);
         builder.Services.AddSingleton<ISoundService, SoundService>();
-
-        Routing.RegisterRoute(nameof(StatsByDaysPage), typeof(StatsByDaysPage));
-        Routing.RegisterRoute(nameof(StatsByPlayersPage), typeof(StatsByPlayersPage));
 
         var app = builder.Build();
 

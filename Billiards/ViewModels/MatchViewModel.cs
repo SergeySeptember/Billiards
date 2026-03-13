@@ -4,6 +4,7 @@ using Billiards.Abstractions;
 using Billiards.Core;
 using Billiards.DataBase.Entities;
 using Billiards.Enum;
+using Billiards.Utils;
 
 namespace Billiards.ViewModels;
 
@@ -344,7 +345,11 @@ public class MatchViewModel : BaseViewModel
 
     private void StartStop()
     {
-        var page = Shell.Current.CurrentPage;
+        var page = PageResolver.CurrentPage;
+        if (page is null)
+        {
+            return;
+        }
 
         if (!_matchTimer.IsRunning)
         {
@@ -404,7 +409,12 @@ public class MatchViewModel : BaseViewModel
     {
         Stop();
 
-        var page = Shell.Current.CurrentPage;
+        var page = PageResolver.CurrentPage;
+        if (page is null)
+        {
+            return;
+        }
+
         var hasActivity = TimerText != "00:00:00";
 
         if (hasActivity)
@@ -454,8 +464,13 @@ public class MatchViewModel : BaseViewModel
         OnPropertyChanged(nameof(StartStopButtonText));
     }
 
-    private bool ValidatePlayers(Page page)
+    private bool ValidatePlayers(Page? page)
     {
+        if (page is null)
+        {
+            return false;
+        }
+
         if (PlayerA is null || PlayerB is null)
         {
             _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
@@ -479,7 +494,12 @@ public class MatchViewModel : BaseViewModel
 
     private async Task<bool> SaveMatchAsync()
     {
-        var page = Shell.Current.CurrentPage;
+        var page = PageResolver.CurrentPage;
+        if (page is null)
+        {
+            return false;
+        }
+
         MatchStats matchStats = new()
         {
             CurrentDateTime = DateTime.Now,
