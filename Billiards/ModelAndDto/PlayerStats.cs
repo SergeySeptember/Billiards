@@ -8,4 +8,6 @@ public class PlayerStats
     public int AccidentalBalls { get; set; }
     public int FoulsBalls { get; set; }
     public int BreakShot { get; set; }
+    public int DryWins { get; set; }
+    public int DryLosses { get; set; }
 }

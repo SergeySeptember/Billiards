@@ -4,7 +4,7 @@
 Сделано на **.NET MAUI** (основной таргет — **Android**, личное использование).
 
 <p>
-  <a href="https://drive.google.com/uc?export=download&id=1O-pZGgbUX0BBix_DLHIpdUgXZZct78PF">
+  <a href="https://drive.google.com/file/d/1aiRNj88-MSCH-0fCK2cAq7kQ-_kilvF2/view">
     <img src="https://img.shields.io/badge/Скачать-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Скачать APK">
   </a>
 </p>
