@@ -5,7 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Billiards.Views"
     xmlns:viewModels="clr-namespace:Billiards.ViewModels"
-    x:DataType="viewModels:MainViewModel">
+    x:DataType="viewModels:MainViewModel"
+    NavigationPage.HasNavigationBar="False"
+    Padding="0">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -28,8 +30,11 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <CarouselView ItemsSource="{Binding Pages}"
+    <CarouselView x:Name="RootCarousel"
+                  ItemsSource="{Binding Pages}"
                   ItemTemplate="{StaticResource MainCarouselTemplateSelector}"
                   Position="{Binding CurrentIndex}"
-                  IsSwipeEnabled="True" />
+                  IsSwipeEnabled="True"
+                  VerticalOptions="Fill"
+                  HorizontalOptions="Fill" />
 </ContentPage>

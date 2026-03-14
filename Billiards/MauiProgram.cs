@@ -2,6 +2,7 @@
 using Billiards.Core;
 using Billiards.DataBase;
 using Billiards.DataBase.Repositories;
+using Billiards.Platforms.Android;
 using Billiards.ViewModels;
 using Billiards.Views;
 using CommunityToolkit.Maui;
@@ -49,6 +50,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<IMatchesStore, MatchesStore>();
 
         builder.Services.AddSingleton<IDatabaseBackupService, DatabaseBackupService>();
+        builder.Services.AddSingleton<IAppPreferences, AndroidAppPreferences>();
+        builder.Services.AddSingleton<IAppDialogService, AndroidAppDialogService>();
+        builder.Services.AddSingleton<IExternalLinkService, AndroidExternalLinkService>();
+        builder.Services.AddSingleton<IStatsDatePickerService, StatsDatePickerService>();
 
         builder.Services.AddSingleton(AudioManager.Current);
         builder.Services.AddSingleton<ISoundService, SoundService>();

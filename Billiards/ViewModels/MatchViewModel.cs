@@ -14,6 +14,9 @@ public class MatchViewModel : BaseViewModel
     private readonly IDispatcherTimer _uiTimer;
     private readonly IPlayersStore _playersStore;
     private readonly IMatchesStore _matchesStore;
+    private readonly ISoundService _soundService;
+    private readonly IAppPreferences _appPreferences;
+    private readonly IAppDialogService _appDialogService;
 
     // ----- Виды бильярда -----
     public ObservableCollection<string> GameTypes { get; } = new()
@@ -108,8 +111,7 @@ public class MatchViewModel : BaseViewModel
         get => _mainBallsA;
         set
         {
-            var negativeScore = Preferences.Default.Get("negative_score", "false");
-            if (string.Equals(negativeScore, "false", StringComparison.OrdinalIgnoreCase) && value < 0)
+            if (!_appPreferences.GetBoolean(Const.NegativeScore, false) && value < 0)
             {
                 return;
             }
@@ -124,8 +126,7 @@ public class MatchViewModel : BaseViewModel
         get => _mainBallsB;
         set
         {
-            var negativeScore = Preferences.Default.Get("negative_score", "false");
-            if (string.Equals(negativeScore, "false", StringComparison.OrdinalIgnoreCase) && value < 0)
+            if (!_appPreferences.GetBoolean(Const.NegativeScore, false) && value < 0)
             {
                 return;
             }
@@ -227,10 +228,19 @@ public class MatchViewModel : BaseViewModel
     public ICommand ToggleBreakShotCommand { get; }
     public ICommand ClearBreakShotCommand { get; }
 
-    public MatchViewModel(IDispatcher dispatcher, IPlayersStore playersStore, IMatchesStore matchesStore, ISoundService soundService)
+    public MatchViewModel(
+        IDispatcher dispatcher,
+        IPlayersStore playersStore,
+        IMatchesStore matchesStore,
+        ISoundService soundService,
+        IAppPreferences appPreferences,
+        IAppDialogService appDialogService)
     {
         _playersStore = playersStore;
         _matchesStore = matchesStore;
+        _soundService = soundService;
+        _appPreferences = appPreferences;
+        _appDialogService = appDialogService;
 
         _selectedGameType = GameTypes.First();
 
@@ -290,8 +300,8 @@ public class MatchViewModel : BaseViewModel
         FoulsIncrementACommand = new Command(() =>
         {
             FoulsA++;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsB++;
             }
@@ -304,8 +314,8 @@ public class MatchViewModel : BaseViewModel
         FoulsIncrementBCommand = new Command(() =>
         {
             FoulsB++;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsA++;
             }
@@ -318,8 +328,8 @@ public class MatchViewModel : BaseViewModel
         FoulsDecrementACommand = new Command(() =>
         {
             FoulsA--;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsB--;
             }
@@ -331,8 +341,8 @@ public class MatchViewModel : BaseViewModel
         FoulsDecrementBCommand = new Command(() =>
         {
             FoulsB--;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsA--;
             }
@@ -345,15 +355,9 @@ public class MatchViewModel : BaseViewModel
 
     private void StartStop()
     {
-        var page = PageResolver.CurrentPage;
-        if (page is null)
-        {
-            return;
-        }
-
         if (!_matchTimer.IsRunning)
         {
-            if (!ValidatePlayers(page))
+            if (!ValidatePlayers())
             {
                 return;
             }
@@ -365,6 +369,7 @@ public class MatchViewModel : BaseViewModel
             IsEditable = false;
 
             OnPropertyChanged(nameof(StartStopButtonText));
+            _soundService.PlayAsync(SoundId.Start);
             return;
         }
 
@@ -380,7 +385,7 @@ public class MatchViewModel : BaseViewModel
             return;
         }
 
-        if (!ValidatePlayers(page))
+        if (!ValidatePlayers())
         {
             return;
         }
@@ -409,17 +414,11 @@ public class MatchViewModel : BaseViewModel
     {
         Stop();
 
-        var page = PageResolver.CurrentPage;
-        if (page is null)
-        {
-            return;
-        }
-
         var hasActivity = TimerText != "00:00:00";
 
         if (hasActivity)
         {
-            var save = await page.DisplayAlert(
+            var save = await _appDialogService.ShowConfirmationAsync(
                 "Новая партия",
                 "Сохранить статистику текущей партии перед началом новой?",
                 "Сохранить",
@@ -464,28 +463,23 @@ public class MatchViewModel : BaseViewModel
         OnPropertyChanged(nameof(StartStopButtonText));
     }
 
-    private bool ValidatePlayers(Page? page)
+    private bool ValidatePlayers()
     {
-        if (page is null)
-        {
-            return false;
-        }
-
         if (PlayerA is null || PlayerB is null)
         {
-            _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Ошибка", "Выбери игроков!", "Ок");
             return false;
         }
 
         if (PlayerA.Name == PlayerB.Name)
         {
-            _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Ошибка", "Выбери разных игроков!", "Ок");
             return false;
         }
 
         if (BreakerPlayer is null)
         {
-            _ = page.DisplayAlert("Ошибка", "Выбери кто будет разбивать!", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Ошибка", "Выбери кто будет разбивать!", "Ок");
             return false;
         }
 
@@ -494,12 +488,6 @@ public class MatchViewModel : BaseViewModel
 
     private async Task<bool> SaveMatchAsync()
     {
-        var page = PageResolver.CurrentPage;
-        if (page is null)
-        {
-            return false;
-        }
-
         MatchStats matchStats = new()
         {
             CurrentDateTime = DateTime.Now,
@@ -538,7 +526,7 @@ public class MatchViewModel : BaseViewModel
         }
         else
         {
-            _ = page.DisplayAlert("Не сохранено", "Победитель не определён (нужно 8+ шаров).", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Не сохранено", "Победитель не определён (нужно 8+ шаров).", "Ок");
             return false;
         }
 

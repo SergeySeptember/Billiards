@@ -5,7 +5,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:Billiards.ViewModels"
-    x:DataType="vm:SettingsViewModel">
+    x:DataType="vm:SettingsViewModel"
+    VerticalOptions="Fill"
+    HorizontalOptions="Fill">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="14">

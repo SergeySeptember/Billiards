@@ -4,7 +4,6 @@ using Billiards.Abstractions;
 using Billiards.DataBase.Entities;
 using Billiards.ModelAndDto;
 using Billiards.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Billiards.ViewModels;
 
@@ -12,6 +11,7 @@ public class StatsViewModel : BaseViewModel
 {
     private readonly IMatchesStore _matchesStore;
     private readonly IServiceProvider _services;
+    private readonly IAppPreferences _appPreferences;
 
     public ObservableCollection<StatsRow> Rows { get; } = new();
 
@@ -31,10 +31,11 @@ public class StatsViewModel : BaseViewModel
     public ICommand OpenByDaysCommand { get; }
     public ICommand OpenByPlayersCommand { get; }
 
-    public StatsViewModel(IMatchesStore matchesStore, IServiceProvider services)
+    public StatsViewModel(IMatchesStore matchesStore, IServiceProvider services, IAppPreferences appPreferences)
     {
         _matchesStore = matchesStore;
         _services = services;
+        _appPreferences = appPreferences;
 
         Rows.CollectionChanged += (_, _) =>
         {
@@ -81,7 +82,7 @@ public class StatsViewModel : BaseViewModel
 
         if (todayMatches.Count == 0)
         {
-            Rows.Add(BuildSummaryRow(todayMatches));
+            Rows.Add(BuildSummaryRow(todayMatches, _appPreferences));
             return;
         }
 
@@ -111,11 +112,11 @@ public class StatsViewModel : BaseViewModel
                 });
             }
 
-            Rows.Add(BuildSummaryRow(groupMatches));
+            Rows.Add(BuildSummaryRow(groupMatches, _appPreferences));
         }
     }
 
-    private static StatsRow BuildSummaryRow(List<MatchStats> matches)
+    private static StatsRow BuildSummaryRow(List<MatchStats> matches, IAppPreferences appPreferences)
     {
         if (matches.Count == 0)
         {
@@ -158,8 +159,7 @@ public class StatsViewModel : BaseViewModel
             }
         }
 
-        var minusRandomBalls = Preferences.Default.Get(Const.MinusRandomBalls, "false");
-        if (string.Equals(minusRandomBalls, "true", StringComparison.OrdinalIgnoreCase))
+        if (appPreferences.GetBoolean(Const.MinusRandomBalls, false))
         {
             firstPlayerPoints -= firstAccidental;
             secondPlayerPoints -= secondAccidental;

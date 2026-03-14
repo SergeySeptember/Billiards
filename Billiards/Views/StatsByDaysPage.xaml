@@ -7,7 +7,9 @@
     xmlns:vm="clr-namespace:Billiards.ViewModels"
     xmlns:modelAndDto="clr-namespace:Billiards.ModelAndDto"
     x:DataType="vm:StatsByDaysViewModel"
-    Title="Статистика по дням">
+    Title="Статистика по дням"
+    NavigationPage.HasNavigationBar="False"
+    NavigationPage.HasBackButton="False">
 
     <ContentPage.Resources>
         <Style x:Key="CellBorderStyle" TargetType="Border">
@@ -60,9 +62,29 @@
         </Style>
     </ContentPage.Resources>
 
-    <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
+    <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Button Text="←"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    Clicked="OnBackClicked" />
 
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Label Grid.Column="1"
+                   Text="Статистика по дням"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center" />
+
+            <BoxView Grid.Column="2"
+                     WidthRequest="44"
+                     Opacity="0" />
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="10">
             <Label Text="День:"
                    FontAttributes="Bold"
                    VerticalTextAlignment="Center" />
@@ -73,11 +95,11 @@
                     Clicked="OnPickDateClicked" />
         </Grid>
 
-        <Label Grid.Row="1"
+        <Label Grid.Row="2"
                Text="{Binding MatchesCount, StringFormat='Матчей: {0}'}"
                FontAttributes="Bold" />
 
-        <ScrollView Grid.Row="2"
+        <ScrollView Grid.Row="3"
                     Orientation="Horizontal"
                     VerticalOptions="FillAndExpand"
                     IsVisible="{Binding IsTableVisible}">
@@ -118,15 +140,15 @@
                         <Label Text="Штрафы" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
 
-                    <Border Grid.Column="7" Style="{StaticResource CellBorderStyle}">
+                    <Border Grid.Column="7" Style="{StaticResource HeaderBorderStyle}">
                         <Label Text="Забитие с разбоя" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
 
-                    <Border Grid.Column="8" Style="{StaticResource CellBorderStyle}">
+                    <Border Grid.Column="8" Style="{StaticResource HeaderBorderStyle}">
                         <Label Text="Время" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
 
-                    <Border Grid.Column="9" Style="{StaticResource CellBorderStyle}">
+                    <Border Grid.Column="9" Style="{StaticResource HeaderBorderStyle}">
                         <Label Text="Пирамида" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
                 </Grid>

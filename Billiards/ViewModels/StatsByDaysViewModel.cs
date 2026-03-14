@@ -9,6 +9,7 @@ namespace Billiards.ViewModels;
 public class StatsByDaysViewModel : BaseViewModel
 {
     private readonly IMatchesStore _matchesStore;
+    private readonly IAppPreferences _appPreferences;
 
     public ObservableCollection<FullMatchStatsRow> Rows { get; } = new();
 
@@ -45,9 +46,10 @@ public class StatsByDaysViewModel : BaseViewModel
         private set => SetProperty(ref _matchesCount, value);
     }
 
-    public StatsByDaysViewModel(IMatchesStore matchesStore)
+    public StatsByDaysViewModel(IMatchesStore matchesStore, IAppPreferences appPreferences)
     {
         _matchesStore = matchesStore;
+        _appPreferences = appPreferences;
         _matchesStore.Matches.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(DatesWithMatches));
@@ -116,13 +118,13 @@ public class StatsByDaysViewModel : BaseViewModel
                 });
             }
 
-            Rows.Add(BuildSummaryRow(groupMatches));
+            Rows.Add(BuildSummaryRow(groupMatches, _appPreferences));
         }
 
         OnPropertyChanged(nameof(IsTableVisible));
     }
 
-    private static FullMatchStatsRow BuildSummaryRow(List<MatchStats> matches)
+    private static FullMatchStatsRow BuildSummaryRow(List<MatchStats> matches, IAppPreferences appPreferences)
     {
         if (matches.Count == 0)
         {
@@ -174,8 +176,7 @@ public class StatsByDaysViewModel : BaseViewModel
             }
         }
 
-        var minusRandomBalls = Preferences.Default.Get(Const.MinusRandomBalls, "false");
-        if (string.Equals(minusRandomBalls, "true", StringComparison.OrdinalIgnoreCase))
+        if (appPreferences.GetBoolean(Const.MinusRandomBalls, false))
         {
             firstPlayerPoints -= firstAccidental;
             secondPlayerPoints -= secondAccidental;

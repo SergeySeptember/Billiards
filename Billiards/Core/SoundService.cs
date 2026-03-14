@@ -1,24 +1,24 @@
-﻿using Billiards.Abstractions;
+using Billiards.Abstractions;
 using Billiards.Enum;
+using Billiards.Utils;
 using Plugin.Maui.Audio;
 
 namespace Billiards.Core;
 
-public sealed class SoundService(IAudioManager audioManager) : ISoundService
+public sealed class SoundService(IAudioManager audioManager, IAppPreferences appPreferences) : ISoundService
 {
-    private const string SoundsEnabledKey = "sounds_enabled";
-
     private static readonly Dictionary<SoundId, string> Map = new()
     {
         [SoundId.FreshMeat] = "fresh_meat.mp3",
         [SoundId.AccidentalPlus] = "sorry.mp3",
         [SoundId.Fall] = "fall.mp3",
-        [SoundId.Shot] = "shot.mp3"
+        [SoundId.Shot] = "shot.mp3",
+        [SoundId.Start] = "start.mp3"
     };
 
     public async Task PlayAsync(SoundId id)
     {
-        if (!Preferences.Default.Get(SoundsEnabledKey, false))
+        if (!appPreferences.GetBoolean(Const.SoundsKey, false))
         {
             return;
         }

@@ -5,5 +5,6 @@ public enum SoundId
     FreshMeat,
     AccidentalPlus,
     Fall,
-    Shot
+    Shot,
+    Start
 }
