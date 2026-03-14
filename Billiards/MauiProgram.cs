@@ -2,6 +2,7 @@
 using Billiards.Core;
 using Billiards.DataBase;
 using Billiards.DataBase.Repositories;
+using Billiards.Platforms.Android;
 using Billiards.ViewModels;
 using Billiards.Views;
 using CommunityToolkit.Maui;
@@ -28,8 +29,6 @@ public static class MauiProgram
         var connectionString = $"Data Source={dbPath}";
         builder.Services.AddDbContextFactory<BilliardsDbContext>(options => options.UseSqlite(connectionString));
 
-        builder.Services.AddSingleton<AppShell>();
-
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<MainCarouselTemplateSelector>();
@@ -51,12 +50,13 @@ public static class MauiProgram
         builder.Services.AddSingleton<IMatchesStore, MatchesStore>();
 
         builder.Services.AddSingleton<IDatabaseBackupService, DatabaseBackupService>();
+        builder.Services.AddSingleton<IAppPreferences, AndroidAppPreferences>();
+        builder.Services.AddSingleton<IAppDialogService, AndroidAppDialogService>();
+        builder.Services.AddSingleton<IExternalLinkService, AndroidExternalLinkService>();
+        builder.Services.AddSingleton<IStatsDatePickerService, StatsDatePickerService>();
 
         builder.Services.AddSingleton(AudioManager.Current);
         builder.Services.AddSingleton<ISoundService, SoundService>();
-
-        Routing.RegisterRoute(nameof(StatsByDaysPage), typeof(StatsByDaysPage));
-        Routing.RegisterRoute(nameof(StatsByPlayersPage), typeof(StatsByPlayersPage));
 
         var app = builder.Build();
 

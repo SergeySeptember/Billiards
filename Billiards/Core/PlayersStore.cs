@@ -6,7 +6,7 @@ namespace Billiards.Core;
 
 public sealed class PlayersStore(IPlayerRepository repo) : IPlayersStore
 {
-    public ObservableCollection<Player> Players { get; } = new();
+    public ObservableCollection<Player> Players { get; } = new ResettableObservableCollection<Player>();
 
     public async Task ReloadAsync()
     {
@@ -14,11 +14,7 @@ public sealed class PlayersStore(IPlayerRepository repo) : IPlayersStore
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            Players.Clear();
-            foreach (var p in items)
-            {
-                Players.Add(p);
-            }
+            ((ResettableObservableCollection<Player>)Players).ReplaceRange(items);
         });
     }
 

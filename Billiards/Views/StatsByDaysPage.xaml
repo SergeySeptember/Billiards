@@ -7,7 +7,9 @@
     xmlns:vm="clr-namespace:Billiards.ViewModels"
     xmlns:modelAndDto="clr-namespace:Billiards.ModelAndDto"
     x:DataType="vm:StatsByDaysViewModel"
-    Title="Статистика по дням">
+    Title="Статистика по дням"
+    NavigationPage.HasNavigationBar="True"
+    NavigationPage.HasBackButton="True">
 
     <ContentPage.Resources>
         <Style x:Key="CellBorderStyle" TargetType="Border">
@@ -36,25 +38,28 @@
         </Style>
 
         <Style x:Key="RowLabelStyle" TargetType="Label" BasedOn="{StaticResource CellLabelStyle}">
+            <Setter Property="FontAttributes" Value="None" />
             <Style.Triggers>
                 <DataTrigger TargetType="Label"
-                             Binding="{Binding MatchNo}"
-                             Value="Σ">
+                             Binding="{Binding IsSummary}"
+                             Value="True">
                     <Setter Property="FontAttributes" Value="Bold" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="SummaryRowBorderStyle" TargetType="Border">
+        <Style x:Key="SummaryRowBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource CellBorderStyle}">
+            <Setter Property="BackgroundColor" Value="Transparent" />
             <Style.Triggers>
                 <DataTrigger TargetType="Border"
-                             Binding="{Binding MatchNo}"
-                             Value="Σ">
+                             Binding="{Binding IsSummary}"
+                             Value="True">
                     <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F6F6F6, Dark=#2A2A2A}" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-
     </ContentPage.Resources>
 
     <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
@@ -64,9 +69,10 @@
                    FontAttributes="Bold"
                    VerticalTextAlignment="Center" />
 
-            <DatePicker Grid.Column="1"
-                        Date="{Binding SelectedDate}"
-                        HorizontalOptions="End" />
+            <Button Grid.Column="1"
+                    Text="{Binding SelectedDateText}"
+                    HorizontalOptions="End"
+                    Clicked="OnPickDateClicked" />
         </Grid>
 
         <Label Grid.Row="1"
@@ -81,7 +87,6 @@
             <Grid RowDefinitions="Auto,*"
                   RowSpacing="0">
 
-                <!-- Header -->
                 <Grid Grid.Row="0"
                       ColumnSpacing="0"
                       RowSpacing="0"
@@ -115,20 +120,19 @@
                         <Label Text="Штрафы" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
 
-                    <Border Grid.Column="7" Style="{StaticResource CellBorderStyle}">
+                    <Border Grid.Column="7" Style="{StaticResource HeaderBorderStyle}">
                         <Label Text="Забитие с разбоя" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
 
-                    <Border Grid.Column="8" Style="{StaticResource CellBorderStyle}">
+                    <Border Grid.Column="8" Style="{StaticResource HeaderBorderStyle}">
                         <Label Text="Время" HorizontalTextAlignment="Center" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
 
-                    <Border Grid.Column="9" Style="{StaticResource CellBorderStyle}">
+                    <Border Grid.Column="9" Style="{StaticResource HeaderBorderStyle}">
                         <Label Text="Пирамида" Style="{StaticResource HeaderLabelStyle}" />
                     </Border>
                 </Grid>
 
-                <!-- Rows -->
                 <CollectionView Grid.Row="1"
                                 ItemsSource="{Binding Rows}"
                                 SelectionMode="None"
@@ -142,10 +146,11 @@
                         <DataTemplate x:DataType="modelAndDto:FullMatchStatsRow">
                             <Grid ColumnSpacing="0"
                                   RowSpacing="0"
+                                  Margin="0"
                                   ColumnDefinitions="40,60,90,100,70,70,70,100,85,160">
 
                                 <Grid.Triggers>
-                                    <DataTrigger TargetType="Grid" Binding="{Binding MatchNo}" Value="Σ">
+                                    <DataTrigger TargetType="Grid" Binding="{Binding IsSummary}" Value="True">
                                         <Setter Property="Margin" Value="0,0,0,12" />
                                     </DataTrigger>
                                 </Grid.Triggers>

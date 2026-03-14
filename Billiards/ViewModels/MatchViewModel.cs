@@ -4,6 +4,7 @@ using Billiards.Abstractions;
 using Billiards.Core;
 using Billiards.DataBase.Entities;
 using Billiards.Enum;
+using Billiards.Utils;
 
 namespace Billiards.ViewModels;
 
@@ -13,6 +14,9 @@ public class MatchViewModel : BaseViewModel
     private readonly IDispatcherTimer _uiTimer;
     private readonly IPlayersStore _playersStore;
     private readonly IMatchesStore _matchesStore;
+    private readonly ISoundService _soundService;
+    private readonly IAppPreferences _appPreferences;
+    private readonly IAppDialogService _appDialogService;
 
     // ----- Виды бильярда -----
     public ObservableCollection<string> GameTypes { get; } = new()
@@ -24,47 +28,39 @@ public class MatchViewModel : BaseViewModel
         "Бесконечная пирамида"
     };
 
-    private bool _isEditable = true;
-
     public bool IsEditable
     {
-        get => _isEditable;
-        set => SetProperty(ref _isEditable, value);
-    }
-
-    private string _selectedGameType;
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     public string SelectedGameType
     {
-        get => _selectedGameType;
-        set => SetProperty(ref _selectedGameType, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     // ----- Игроки -----
     public ObservableCollection<Player> Players => _playersStore.Players;
 
-    private Player? _playerA;
-
     public Player? PlayerA
     {
-        get => _playerA;
+        get;
         set
         {
-            if (SetProperty(ref _playerA, value))
+            if (SetProperty(ref field, value))
             {
                 RefreshBreakerCandidates();
             }
         }
     }
 
-    private Player? _playerB;
-
     public Player? PlayerB
     {
-        get => _playerB;
+        get;
         set
         {
-            if (SetProperty(ref _playerB, value))
+            if (SetProperty(ref field, value))
             {
                 RefreshBreakerCandidates();
             }
@@ -73,22 +69,18 @@ public class MatchViewModel : BaseViewModel
 
     public ObservableCollection<Player> BreakerCandidates { get; } = new();
 
-    private Player? _breakerPlayer;
-
     public Player? BreakerPlayer
     {
-        get => _breakerPlayer;
-        set => SetProperty(ref _breakerPlayer, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string? _breakShotPlayerName;
 
     public string? BreakShotPlayerName
     {
-        get => _breakShotPlayerName;
+        get;
         set
         {
-            if (SetProperty(ref _breakShotPlayerName, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(IsBreakShotA));
                 OnPropertyChanged(nameof(IsBreakShotB));
@@ -100,102 +92,86 @@ public class MatchViewModel : BaseViewModel
     public bool IsBreakShotB => !string.IsNullOrEmpty(BreakShotPlayerName) && BreakShotPlayerName == PlayerB?.Name;
 
     // ----- Счётчики -----
-    private int _mainBallsA;
-
     public int MainBallsA
     {
-        get => _mainBallsA;
+        get;
         set
         {
-            var negativeScore = Preferences.Default.Get("negative_score", "false");
-            if (string.Equals(negativeScore, "false", StringComparison.OrdinalIgnoreCase) && value < 0)
+            if (!_appPreferences.GetBoolean(Const.NegativeScore, false) && value < 0)
             {
                 return;
             }
-            SetProperty(ref _mainBallsA, value);
+            SetProperty(ref field, value);
         }
     }
-
-    private int _mainBallsB;
 
     public int MainBallsB
     {
-        get => _mainBallsB;
+        get;
         set
         {
-            var negativeScore = Preferences.Default.Get("negative_score", "false");
-            if (string.Equals(negativeScore, "false", StringComparison.OrdinalIgnoreCase) && value < 0)
+            if (!_appPreferences.GetBoolean(Const.NegativeScore, false) && value < 0)
             {
                 return;
             }
-            SetProperty(ref _mainBallsB, value);
+            SetProperty(ref field, value);
         }
     }
-
-    private int _accidentalBallsA;
 
     public int AccidentalBallsA
     {
-        get => _accidentalBallsA;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _accidentalBallsA, value);
+                SetProperty(ref field, value);
             }
         }
     }
-
-    private int _accidentalBallsB;
 
     public int AccidentalBallsB
     {
-        get => _accidentalBallsB;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _accidentalBallsB, value);
+                SetProperty(ref field, value);
             }
         }
     }
-
-    private int _foulsA;
 
     public int FoulsA
     {
-        get => _foulsA;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _foulsA, value);
+                SetProperty(ref field, value);
             }
         }
     }
 
-    private int _foulsB;
-
     public int FoulsB
     {
-        get => _foulsB;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _foulsB, value);
+                SetProperty(ref field, value);
             }
         }
     }
 
     // ----- Таймер -----
-    private string _timerText = "00:00:00";
-
     public string TimerText
     {
-        get => _timerText;
-        set => SetProperty(ref _timerText, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = "00:00:00";
 
     public string StartStopButtonText =>
         !_matchTimer.IsRunning
@@ -226,12 +202,21 @@ public class MatchViewModel : BaseViewModel
     public ICommand ToggleBreakShotCommand { get; }
     public ICommand ClearBreakShotCommand { get; }
 
-    public MatchViewModel(IDispatcher dispatcher, IPlayersStore playersStore, IMatchesStore matchesStore, ISoundService soundService)
+    public MatchViewModel(
+        IDispatcher dispatcher,
+        IPlayersStore playersStore,
+        IMatchesStore matchesStore,
+        ISoundService soundService,
+        IAppPreferences appPreferences,
+        IAppDialogService appDialogService)
     {
         _playersStore = playersStore;
         _matchesStore = matchesStore;
+        _soundService = soundService;
+        _appPreferences = appPreferences;
+        _appDialogService = appDialogService;
 
-        _selectedGameType = GameTypes.First();
+        SelectedGameType = GameTypes.First();
 
         _uiTimer = dispatcher.CreateTimer();
         _uiTimer.Interval = TimeSpan.FromSeconds(1);
@@ -246,13 +231,13 @@ public class MatchViewModel : BaseViewModel
         MainBallsIncrementACommand = new Command(() =>
         {
             MainBallsA++;
-            soundService.PlayAsync(SoundId.Shot);
+            soundService.PlayMainBallsIncrementAsync();
         });
         MainBallsDecrementACommand = new Command(() => MainBallsA--);
         MainBallsIncrementBCommand = new Command(() =>
         {
             MainBallsB++;
-            soundService.PlayAsync(SoundId.Shot);
+            soundService.PlayMainBallsIncrementAsync();
         });
         MainBallsDecrementBCommand = new Command(() => MainBallsB--);
 
@@ -261,13 +246,13 @@ public class MatchViewModel : BaseViewModel
         {
             AccidentalBallsA++;
             MainBallsA++;
-            soundService.PlayAsync(SoundId.AccidentalPlus);
+            soundService.PlayAccidentalIncrementAsync();
         });
         AccidentalBallsIncrementBCommand = new Command(() =>
         {
             AccidentalBallsB++;
             MainBallsB++;
-            soundService.PlayAsync(SoundId.AccidentalPlus);
+            soundService.PlayAccidentalIncrementAsync();
         });
         AccidentalBallsDecrementACommand = new Command(() =>
         {
@@ -289,8 +274,8 @@ public class MatchViewModel : BaseViewModel
         FoulsIncrementACommand = new Command(() =>
         {
             FoulsA++;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsB++;
             }
@@ -298,13 +283,13 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsA--;
             }
-            soundService.PlayAsync(SoundId.Fall);
+            soundService.PlayFoulsIncrementAsync();
         });
         FoulsIncrementBCommand = new Command(() =>
         {
             FoulsB++;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsA++;
             }
@@ -312,13 +297,13 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsB--;
             }
-            soundService.PlayAsync(SoundId.Fall);
+            soundService.PlayFoulsIncrementAsync();
         });
         FoulsDecrementACommand = new Command(() =>
         {
             FoulsA--;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsB--;
             }
@@ -330,8 +315,8 @@ public class MatchViewModel : BaseViewModel
         FoulsDecrementBCommand = new Command(() =>
         {
             FoulsB--;
-            var foulMode = Preferences.Default.Get("foul_mode", "shelf");
-            if (foulMode == "shelf")
+            var foulMode = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
+            if (foulMode == Const.ModeShelf)
             {
                 MainBallsA--;
             }
@@ -344,11 +329,9 @@ public class MatchViewModel : BaseViewModel
 
     private void StartStop()
     {
-        var page = Shell.Current.CurrentPage;
-
         if (!_matchTimer.IsRunning)
         {
-            if (!ValidatePlayers(page))
+            if (!ValidatePlayers())
             {
                 return;
             }
@@ -360,6 +343,7 @@ public class MatchViewModel : BaseViewModel
             IsEditable = false;
 
             OnPropertyChanged(nameof(StartStopButtonText));
+            _soundService.PlayStartButtonAsync();
             return;
         }
 
@@ -375,7 +359,7 @@ public class MatchViewModel : BaseViewModel
             return;
         }
 
-        if (!ValidatePlayers(page))
+        if (!ValidatePlayers())
         {
             return;
         }
@@ -404,12 +388,11 @@ public class MatchViewModel : BaseViewModel
     {
         Stop();
 
-        var page = Shell.Current.CurrentPage;
         var hasActivity = TimerText != "00:00:00";
 
         if (hasActivity)
         {
-            var save = await page.DisplayAlert(
+            var save = await _appDialogService.ShowConfirmationAsync(
                 "Новая партия",
                 "Сохранить статистику текущей партии перед началом новой?",
                 "Сохранить",
@@ -454,23 +437,23 @@ public class MatchViewModel : BaseViewModel
         OnPropertyChanged(nameof(StartStopButtonText));
     }
 
-    private bool ValidatePlayers(Page page)
+    private bool ValidatePlayers()
     {
         if (PlayerA is null || PlayerB is null)
         {
-            _ = page.DisplayAlert("Ошибка", "Выбери игроков!", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Ошибка", "Выбери игроков!", "Ок");
             return false;
         }
 
         if (PlayerA.Name == PlayerB.Name)
         {
-            _ = page.DisplayAlert("Ошибка", "Выбери разных игроков!", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Ошибка", "Выбери разных игроков!", "Ок");
             return false;
         }
 
         if (BreakerPlayer is null)
         {
-            _ = page.DisplayAlert("Ошибка", "Выбери кто будет разбивать!", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Ошибка", "Выбери кто будет разбивать!", "Ок");
             return false;
         }
 
@@ -479,7 +462,6 @@ public class MatchViewModel : BaseViewModel
 
     private async Task<bool> SaveMatchAsync()
     {
-        var page = Shell.Current.CurrentPage;
         MatchStats matchStats = new()
         {
             CurrentDateTime = DateTime.Now,
@@ -518,7 +500,7 @@ public class MatchViewModel : BaseViewModel
         }
         else
         {
-            _ = page.DisplayAlert("Не сохранено", "Победитель не определён (нужно 8+ шаров).", "Ок");
+            _ = _appDialogService.ShowMessageAsync("Не сохранено", "Победитель не определён (нужно 8+ шаров).", "Ок");
             return false;
         }
 
@@ -548,6 +530,7 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsB++;
             }
+            _soundService.PlayAsync(SoundId.BreakShot);
         }
         if (BreakShotPlayerName is not null)
         {

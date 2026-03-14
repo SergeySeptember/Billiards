@@ -9,37 +9,48 @@ namespace Billiards.ViewModels;
 public class StatsByDaysViewModel : BaseViewModel
 {
     private readonly IMatchesStore _matchesStore;
+    private readonly IAppPreferences _appPreferences;
 
     public ObservableCollection<FullMatchStatsRow> Rows { get; } = new();
 
-    private DateTime _selectedDate = DateTime.Today;
-
     public DateTime SelectedDate
     {
-        get => _selectedDate;
+        get;
         set
         {
-            if (SetProperty(ref _selectedDate, value))
+            if (SetProperty(ref field, value))
             {
+                OnPropertyChanged(nameof(SelectedDateText));
                 RebuildRows();
             }
         }
-    }
+    } = DateTime.Today;
+
+    public string SelectedDateText => SelectedDate.ToString("dd.MM.yyyy");
+
+    public IReadOnlyList<DateTime> DatesWithMatches => _matchesStore.Matches
+        .Select(m => m.CurrentDateTime.Date)
+        .Distinct()
+        .OrderBy(d => d)
+        .ToList();
 
     public bool IsTableVisible => Rows.Count > 0;
 
-    private int _matchesCount;
-
     public int MatchesCount
     {
-        get => _matchesCount;
-        private set => SetProperty(ref _matchesCount, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
-    public StatsByDaysViewModel(IMatchesStore matchesStore)
+    public StatsByDaysViewModel(IMatchesStore matchesStore, IAppPreferences appPreferences)
     {
         _matchesStore = matchesStore;
-        _matchesStore.Matches.CollectionChanged += (_, _) => RebuildRows();
+        _appPreferences = appPreferences;
+        _matchesStore.Matches.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(DatesWithMatches));
+            RebuildRows();
+        };
         RebuildRows();
     }
 
@@ -103,17 +114,17 @@ public class StatsByDaysViewModel : BaseViewModel
                 });
             }
 
-            Rows.Add(BuildSummaryRow(groupMatches));
+            Rows.Add(BuildSummaryRow(groupMatches, _appPreferences));
         }
 
         OnPropertyChanged(nameof(IsTableVisible));
     }
 
-    private static FullMatchStatsRow BuildSummaryRow(List<MatchStats> matches)
+    private static FullMatchStatsRow BuildSummaryRow(List<MatchStats> matches, IAppPreferences appPreferences)
     {
         if (matches.Count == 0)
         {
-            return new() { MatchNo = "Σ" };
+            return new() { IsSummary = true, MatchNo = "Σ" };
         }
 
         var firstPlayerName = matches[0].WinnerPlayer;
@@ -161,8 +172,7 @@ public class StatsByDaysViewModel : BaseViewModel
             }
         }
 
-        var minusRandomBalls = Preferences.Default.Get(Const.MinusRandomBalls, "false");
-        if (string.Equals(minusRandomBalls, "true", StringComparison.OrdinalIgnoreCase))
+        if (appPreferences.GetBoolean(Const.MinusRandomBalls, false))
         {
             firstPlayerPoints -= firstAccidental;
             secondPlayerPoints -= secondAccidental;
@@ -193,6 +203,7 @@ public class StatsByDaysViewModel : BaseViewModel
 
         return new()
         {
+            IsSummary = true,
             MatchNo = "Σ",
             Winner = winner,
             Loser = loser,

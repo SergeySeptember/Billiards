@@ -6,7 +6,7 @@ namespace Billiards.Core;
 
 public sealed class MatchesStore(IMatchStatsRepository repo) : IMatchesStore
 {
-    public ObservableCollection<MatchStats> Matches { get; } = new();
+    public ObservableCollection<MatchStats> Matches { get; } = new ResettableObservableCollection<MatchStats>();
 
     public async Task ReloadAsync()
     {
@@ -14,11 +14,7 @@ public sealed class MatchesStore(IMatchStatsRepository repo) : IMatchesStore
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            Matches.Clear();
-            foreach (var m in items)
-            {
-                Matches.Add(m);
-            }
+            ((ResettableObservableCollection<MatchStats>)Matches).ReplaceRange(items);
         });
     }
 

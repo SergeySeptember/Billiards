@@ -13,6 +13,9 @@ public class SettingsViewModel : BaseViewModel
 {
     private readonly IPlayersStore _playersStore;
     private readonly IMatchesStore _matchesStore;
+    private readonly IAppPreferences _appPreferences;
+    private readonly IAppDialogService _appDialogService;
+    private readonly IExternalLinkService _externalLinkService;
 
     private bool _isDarkTheme;
 
@@ -43,12 +46,15 @@ public class SettingsViewModel : BaseViewModel
         get => _isSoundsEnabled;
         set
         {
-            Preferences.Default.Set(Const.SoundsKey, value);
-            SetProperty(ref _isSoundsEnabled, value);
+            if (SetProperty(ref _isSoundsEnabled, value))
+            {
+                _appPreferences.SetBoolean(Const.SoundsKey, value);
+            }
         }
     }
 
     private bool _isNegativeScore;
+
     public bool IsNegativeScore
     {
         get => _isNegativeScore;
@@ -56,12 +62,13 @@ public class SettingsViewModel : BaseViewModel
         {
             if (SetProperty(ref _isNegativeScore, value))
             {
-                Preferences.Default.Set(Const.NegativeScore, value.ToString());
+                _appPreferences.SetBoolean(Const.NegativeScore, value);
             }
         }
     }
 
     private bool _minusRandomBalls;
+
     public bool MinusRandomBalls
     {
         get => _minusRandomBalls;
@@ -69,7 +76,7 @@ public class SettingsViewModel : BaseViewModel
         {
             if (SetProperty(ref _minusRandomBalls, value))
             {
-                Preferences.Default.Set(Const.MinusRandomBalls, value.ToString());
+                _appPreferences.SetBoolean(Const.MinusRandomBalls, value);
                 _matchesStore.ReloadAsync();
             }
         }
@@ -135,17 +142,27 @@ public class SettingsViewModel : BaseViewModel
     public ICommand OpenTelegramCommand { get; }
     public ICommand OpenRulesCommand { get; }
 
-    public SettingsViewModel(IPlayersStore playersStore, IMatchesStore matchesStore, IDatabaseBackupService backupService, ISoundService soundService)
+    public SettingsViewModel(
+        IPlayersStore playersStore,
+        IMatchesStore matchesStore,
+        IDatabaseBackupService backupService,
+        ISoundService soundService,
+        IAppPreferences appPreferences,
+        IAppDialogService appDialogService,
+        IExternalLinkService externalLinkService)
     {
         _playersStore = playersStore;
         _matchesStore = matchesStore;
         _backupService = backupService;
         _soundService = soundService;
+        _appPreferences = appPreferences;
+        _appDialogService = appDialogService;
+        _externalLinkService = externalLinkService;
 
         ExportDataCommand = new Command(async () => await ExportDataAsync());
         ImportDataCommand = new Command(async () => await ImportDataAsync());
 
-        _isSoundsEnabled = Preferences.Default.Get(Const.SoundsKey, false);
+        _isSoundsEnabled = _appPreferences.GetBoolean(Const.SoundsKey, false);
 
         AddPlayerCommand = new Command(async () => await AddPlayerAsync());
         DeletePlayerCommand = new Command(async () => await DeletePlayerAsync());
@@ -156,6 +173,7 @@ public class SettingsViewModel : BaseViewModel
         OpenRulesCommand = new Command(async () => await OpenUrlAsync("https://www.fbsrf.ru/sites/default/files/04-novaya_redakciya_pravil_piramidy_2025-09.pdf"));
 
         LoadFoulModeSettings();
+        LoadNegativeScoreSettings();
         LoadMinusRandomBallsSettings();
     }
 
@@ -173,20 +191,24 @@ public class SettingsViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsFoulToTable));
         _guard = false;
 
-        Preferences.Default.Set(Const.FoulModeKey, _foulMode);
+        _appPreferences.SetString(Const.FoulModeKey, _foulMode);
     }
 
     private void LoadMinusRandomBallsSettings()
     {
-        var saved = Preferences.Default.Get(Const.MinusRandomBalls, "false");
-        MinusRandomBalls = saved == "true";
-
+        _minusRandomBalls = _appPreferences.GetBoolean(Const.MinusRandomBalls, false);
         OnPropertyChanged(nameof(MinusRandomBalls));
+    }
+
+    private void LoadNegativeScoreSettings()
+    {
+        _isNegativeScore = _appPreferences.GetBoolean(Const.NegativeScore, false);
+        OnPropertyChanged(nameof(IsNegativeScore));
     }
 
     private void LoadFoulModeSettings()
     {
-        var saved = Preferences.Default.Get(Const.FoulModeKey, Const.ModeShelf);
+        var saved = _appPreferences.GetString(Const.FoulModeKey, Const.ModeShelf);
         _foulMode = saved == Const.ModeTable ? Const.ModeTable : Const.ModeShelf;
 
         OnPropertyChanged(nameof(IsFoulToShelf));
@@ -197,7 +219,6 @@ public class SettingsViewModel : BaseViewModel
     {
         try
         {
-            var page = Shell.Current.CurrentPage;
             var backup = await _backupService.BuildBackupAsync();
             var json = JsonSerializer.Serialize(backup, JsonOptions);
 
@@ -209,16 +230,16 @@ public class SettingsViewModel : BaseViewModel
 
             if (result.IsSuccessful)
             {
-                await page.DisplayAlert("Готово", "Бэкап сохранён.", "Ок");
+                await _appDialogService.ShowMessageAsync("Готово", "Бэкап сохранён.", "Ок");
             }
             else
             {
-                await page.DisplayAlert("Не сохранилось", result.Exception?.Message ?? "Неизвестная ошибка", "Ок");
+                await _appDialogService.ShowMessageAsync("Не сохранилось", result.Exception?.Message ?? "Неизвестная ошибка", "Ок");
             }
         }
         catch (Exception ex)
         {
-            await (Shell.Current.CurrentPage.DisplayAlert("Ошибка экспорта", ex.Message, "Ок") ?? Task.CompletedTask);
+            await _appDialogService.ShowMessageAsync("Ошибка экспорта", ex.Message, "Ок");
         }
     }
 
@@ -226,7 +247,6 @@ public class SettingsViewModel : BaseViewModel
     {
         try
         {
-            var page = Shell.Current.CurrentPage;
             var file = await FilePicker.Default.PickAsync(new()
             {
                 PickerTitle = "Выбери JSON-бэкап"
@@ -237,7 +257,7 @@ public class SettingsViewModel : BaseViewModel
                 return;
             }
 
-            var confirm = await page.DisplayAlert(
+            var confirm = await _appDialogService.ShowConfirmationAsync(
                 "Импорт данных",
                 "Импорт удалит текущие данные и заменит их данными из файла. Продолжить?",
                 "Да",
@@ -255,20 +275,20 @@ public class SettingsViewModel : BaseViewModel
             var backup = JsonSerializer.Deserialize<BilliardsBackupDto>(json, JsonOptions);
             if (backup is null)
             {
-                await page.DisplayAlert("Ошибка", "Не смог прочитать файл бэкапа.", "Ок");
+                await _appDialogService.ShowMessageAsync("Ошибка", "Не смог прочитать файл бэкапа.", "Ок");
                 return;
             }
 
             await _backupService.RestoreBackupAsync(backup);
 
-            await page.DisplayAlert("Готово", "Данные загружены.", "Ок");
+            await _appDialogService.ShowMessageAsync("Готово", "Данные загружены.", "Ок");
 
             await _matchesStore.ReloadAsync();
             await _playersStore.ReloadAsync();
         }
         catch (Exception ex)
         {
-            await (Shell.Current.CurrentPage.DisplayAlert("Ошибка импорта", ex.Message, "Ок") ?? Task.CompletedTask);
+            await _appDialogService.ShowMessageAsync("Ошибка импорта", ex.Message, "Ок");
         }
     }
 
@@ -281,7 +301,7 @@ public class SettingsViewModel : BaseViewModel
         }
 
         app.UserAppTheme = _isDarkTheme ? AppTheme.Dark : AppTheme.Light;
-        Preferences.Default.Set(Const.ThemeKey, _isDarkTheme ? "dark" : "light");
+        _appPreferences.SetString(Const.ThemeKey, _isDarkTheme ? "dark" : "light");
     }
 
     public void SyncThemeWithSystemIfNotSet()
@@ -292,9 +312,9 @@ public class SettingsViewModel : BaseViewModel
             return;
         }
 
-        if (Preferences.Default.ContainsKey(Const.ThemeKey))
+        if (_appPreferences.Contains(Const.ThemeKey))
         {
-            IsDarkTheme = Preferences.Default.Get(Const.ThemeKey, "light") == "dark";
+            IsDarkTheme = _appPreferences.GetString(Const.ThemeKey, "light") == "dark";
             app.UserAppTheme = IsDarkTheme ? AppTheme.Dark : AppTheme.Light;
         }
         else
@@ -307,8 +327,7 @@ public class SettingsViewModel : BaseViewModel
 
     private async Task AddPlayerAsync()
     {
-        var page = Shell.Current.CurrentPage;
-        var name = await page.DisplayPromptAsync(
+        var name = await _appDialogService.ShowPromptAsync(
             "Новый игрок",
             "Введи имя игрока",
             "Добавить",
@@ -322,34 +341,31 @@ public class SettingsViewModel : BaseViewModel
 
         name = name.Trim();
         await _playersStore.AddAsync(name);
-        _soundService.PlayAsync(SoundId.FreshMeat);
-        await page.DisplayAlert("Готово", $"Игрок добавлен: {name}", "Ок");
+        await _soundService.PlayAsync(SoundId.FreshMeat);
+        await _appDialogService.ShowMessageAsync("Готово", $"Игрок добавлен: {name}", "Ок");
     }
 
     private async Task DeletePlayerAsync()
     {
-        var page = Shell.Current.CurrentPage;
-
         var names = _playersStore.Players
             .Select(p => p.Name)
             .ToArray();
         if (names.Length == 0)
         {
-            await page.DisplayAlert("Пусто", "Удалять некого — список игроков пуст.", "Ок");
+            await _appDialogService.ShowMessageAsync("Пусто", "Удалять некого — список игроков пуст.", "Ок");
             return;
         }
 
-        var selected = await page.DisplayActionSheet(
+        var selected = await _appDialogService.ShowSelectionAsync(
             "Удалить игрока",
-            "Отмена",
-            null,
-            names);
-        if (string.IsNullOrWhiteSpace(selected) || selected == "Отмена")
+            names,
+            "Отмена");
+        if (string.IsNullOrWhiteSpace(selected))
         {
             return;
         }
 
-        var confirm = await page.DisplayAlert(
+        var confirm = await _appDialogService.ShowConfirmationAsync(
             "Подтверди удаление",
             $"Удалить игрока «{selected}» и ВСЕ партии, где он участвовал?",
             "Удалить",
@@ -365,26 +381,20 @@ public class SettingsViewModel : BaseViewModel
 
         if (deletedPlayer)
         {
-            await page.DisplayAlert(
+            await _appDialogService.ShowMessageAsync(
                 "Готово",
                 $"Игрок удалён: {selected}",
                 "Ок");
         }
         else
         {
-            await page.DisplayAlert("Ой", $"Игрок «{selected}» почему-то не удалился…", "Ок");
+            await _appDialogService.ShowMessageAsync("Ой", $"Игрок «{selected}» почему-то не удалился…", "Ок");
         }
     }
 
     private async Task ClearDbAsync()
     {
-        var page = Shell.Current.CurrentPage;
-        if (page is null)
-        {
-            return;
-        }
-
-        var confirm = await page.DisplayAlert(
+        var confirm = await _appDialogService.ShowConfirmationAsync(
             "Очистить БД",
             "Удалить всех игроков и всю статистику матчей?\nЭто действие нельзя отменить.",
             "Да, очистить",
@@ -398,22 +408,14 @@ public class SettingsViewModel : BaseViewModel
         await _matchesStore.DeleteAllAsync();
         await _playersStore.DeleteAllAsync();
 
-        await page.DisplayAlert("Готово", "База очищена.", "Ок");
+        await _appDialogService.ShowMessageAsync("Готово", "База очищена.", "Ок");
     }
 
-    private static async Task OpenUrlAsync(string url)
+    private async Task OpenUrlAsync(string url)
     {
-        try
+        if (!await _externalLinkService.OpenUrlAsync(url))
         {
-            await Launcher.Default.OpenAsync(new Uri(url));
-        }
-        catch
-        {
-            var page = Shell.Current.CurrentPage;
-            if (page is not null)
-            {
-                await page.DisplayAlert("Ошибка", "Не удалось открыть ссылку.", "Ок");
-            }
+            await _appDialogService.ShowMessageAsync("Ошибка", "Не удалось открыть ссылку.", "Ок");
         }
     }
 }

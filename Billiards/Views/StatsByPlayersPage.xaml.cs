@@ -16,6 +16,8 @@ public partial class StatsByPlayersPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        NavigationPage.SetHasNavigationBar(this, true);
+        NavigationPage.SetHasBackButton(this, true);
         await _vm.LoadAsync();
     }
 }

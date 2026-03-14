@@ -10,18 +10,18 @@ namespace Billiards.ViewModels;
 public class StatsViewModel : BaseViewModel
 {
     private readonly IMatchesStore _matchesStore;
+    private readonly IServiceProvider _services;
+    private readonly IAppPreferences _appPreferences;
 
     public ObservableCollection<StatsRow> Rows { get; } = new();
 
     public bool IsEmptyVisible => MatchesCount <= 1;
     public bool IsTableVisible => MatchesCount > 0;
 
-    private int _matchesCount;
-
     public int MatchesCount
     {
-        get => _matchesCount;
-        private set => SetProperty(ref _matchesCount, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public string MatchesCountText => $"Матчей сегодня: {MatchesCount}";
@@ -29,9 +29,11 @@ public class StatsViewModel : BaseViewModel
     public ICommand OpenByDaysCommand { get; }
     public ICommand OpenByPlayersCommand { get; }
 
-    public StatsViewModel(IMatchesStore matchesStore)
+    public StatsViewModel(IMatchesStore matchesStore, IServiceProvider services, IAppPreferences appPreferences)
     {
         _matchesStore = matchesStore;
+        _services = services;
+        _appPreferences = appPreferences;
 
         Rows.CollectionChanged += (_, _) =>
         {
@@ -46,17 +48,19 @@ public class StatsViewModel : BaseViewModel
 
         OpenByDaysCommand = new Command(async () =>
         {
-            if (Shell.Current is not null)
+            var navigation = PageResolver.Navigation;
+            if (navigation is not null)
             {
-                await Shell.Current.GoToAsync(nameof(Views.StatsByDaysPage));
+                await navigation.PushAsync(_services.GetRequiredService<Views.StatsByDaysPage>());
             }
         });
 
         OpenByPlayersCommand = new Command(async () =>
         {
-            if (Shell.Current is not null)
+            var navigation = PageResolver.Navigation;
+            if (navigation is not null)
             {
-                await Shell.Current.GoToAsync(nameof(Views.StatsByPlayersPage));
+                await navigation.PushAsync(_services.GetRequiredService<Views.StatsByPlayersPage>());
             }
         });
     }
@@ -76,7 +80,7 @@ public class StatsViewModel : BaseViewModel
 
         if (todayMatches.Count == 0)
         {
-            Rows.Add(BuildSummaryRow(todayMatches));
+            Rows.Add(BuildSummaryRow(todayMatches, _appPreferences));
             return;
         }
 
@@ -106,11 +110,11 @@ public class StatsViewModel : BaseViewModel
                 });
             }
 
-            Rows.Add(BuildSummaryRow(groupMatches));
+            Rows.Add(BuildSummaryRow(groupMatches, _appPreferences));
         }
     }
 
-    private static StatsRow BuildSummaryRow(List<MatchStats> matches)
+    private static StatsRow BuildSummaryRow(List<MatchStats> matches, IAppPreferences appPreferences)
     {
         if (matches.Count == 0)
         {
@@ -153,8 +157,7 @@ public class StatsViewModel : BaseViewModel
             }
         }
 
-        var minusRandomBalls = Preferences.Default.Get(Const.MinusRandomBalls, "false");
-        if (string.Equals(minusRandomBalls, "true", StringComparison.OrdinalIgnoreCase))
+        if (appPreferences.GetBoolean(Const.MinusRandomBalls, false))
         {
             firstPlayerPoints -= firstAccidental;
             secondPlayerPoints -= secondAccidental;
@@ -167,6 +170,7 @@ public class StatsViewModel : BaseViewModel
             var isFirstPlayerWin = firstPlayerPoints > secondPlayerPoints;
             return new()
             {
+                IsSummary = true,
                 MatchNo = "Σ",
                 Winner = isFirstPlayerWin ? firstPlayerName : secondPlayerName,
                 Loser = isFirstPlayerWin ? secondPlayerName : firstPlayerName,
@@ -179,6 +183,7 @@ public class StatsViewModel : BaseViewModel
             var isFirstPlayerWin = firstPlayerMatchWin > secondPlayerMatchWin;
             return new()
             {
+                IsSummary = true,
                 MatchNo = "Σ",
                 Winner = isFirstPlayerWin ? firstPlayerName : secondPlayerName,
                 Loser = isFirstPlayerWin ? secondPlayerName : firstPlayerName,

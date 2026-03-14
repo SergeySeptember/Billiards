@@ -7,7 +7,9 @@
     xmlns:vm="clr-namespace:Billiards.ViewModels"
     xmlns:dto="clr-namespace:Billiards.ModelAndDto"
     x:DataType="vm:StatsByPlayersViewModel"
-    Title="По игрокам">
+    Title="По игрокам"
+    NavigationPage.HasNavigationBar="True"
+    NavigationPage.HasBackButton="True">
 
     <ContentPage.Resources>
         <Style x:Key="CellBorder" TargetType="Border">
@@ -38,10 +40,6 @@
     </ContentPage.Resources>
 
     <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
-        <Label Text="Статистика по игрокам"
-               FontSize="20"
-               FontAttributes="Bold"
-               HorizontalOptions="Center" />
 
         <Label Grid.Row="1"
                Text="{Binding AverageMatchTimeText}"

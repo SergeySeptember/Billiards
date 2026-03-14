@@ -1,4 +1,4 @@
-﻿using Billiards.ViewModels;
+using Billiards.ViewModels;
 
 namespace Billiards.Views;
 

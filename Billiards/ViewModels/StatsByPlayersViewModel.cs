@@ -12,28 +12,22 @@ public class StatsByPlayersViewModel : BaseViewModel
 
     public ObservableCollection<PlayerStats> Rows { get; } = new();
 
-    private string _averageMatchTimeText = "Среднее время игр за все время: 00:00:00";
-
     public string AverageMatchTimeText
     {
-        get => _averageMatchTimeText;
-        set => SetProperty(ref _averageMatchTimeText, value);
-    }
-
-    private bool _isEmptyVisible;
+        get;
+        set => SetProperty(ref field, value);
+    } = "Среднее время игр за все время: 00:00:00";
 
     public bool IsEmptyVisible
     {
-        get => _isEmptyVisible;
-        set => SetProperty(ref _isEmptyVisible, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private bool _isTableVisible;
 
     public bool IsTableVisible
     {
-        get => _isTableVisible;
-        set => SetProperty(ref _isTableVisible, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public ICommand RefreshCommand { get; }

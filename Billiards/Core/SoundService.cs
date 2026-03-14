@@ -1,24 +1,47 @@
-﻿using Billiards.Abstractions;
+using Billiards.Abstractions;
 using Billiards.Enum;
+using Billiards.Utils;
 using Plugin.Maui.Audio;
 
 namespace Billiards.Core;
 
-public sealed class SoundService(IAudioManager audioManager) : ISoundService
+public sealed class SoundService(IAudioManager audioManager, IAppPreferences appPreferences) : ISoundService
 {
-    private const string SoundsEnabledKey = "sounds_enabled";
-
     private static readonly Dictionary<SoundId, string> Map = new()
     {
         [SoundId.FreshMeat] = "fresh_meat.mp3",
         [SoundId.AccidentalPlus] = "sorry.mp3",
         [SoundId.Fall] = "fall.mp3",
-        [SoundId.Shot] = "shot.mp3"
+        [SoundId.Shot] = "shot.mp3",
+        [SoundId.BreakShot] = "breakShot.mp3",
+        [SoundId.Start] = "start.mp3"
     };
+
+    private static readonly string[] StartButtonSounds =
+    [
+        "start.mp3"
+    ];
+
+    private static readonly string[] MainBallsIncrementSounds =
+    [
+        "shot.mp3"
+    ];
+
+    private static readonly string[] AccidentalIncrementSounds =
+    [
+        "sorry.mp3",
+        "accidental_plus.mp3"
+    ];
+
+    private static readonly string[] FoulsIncrementSounds =
+    [
+        "fall.mp3",
+        "mepo.mp3"
+    ];
 
     public async Task PlayAsync(SoundId id)
     {
-        if (!Preferences.Default.Get(SoundsEnabledKey, false))
+        if (!appPreferences.GetBoolean(Const.SoundsKey, false))
         {
             return;
         }
@@ -28,6 +51,30 @@ public sealed class SoundService(IAudioManager audioManager) : ISoundService
             return;
         }
 
+        await PlayFileAsync(fileName);
+    }
+
+    public Task PlayStartButtonAsync() => PlayRandomAsync(StartButtonSounds);
+
+    public Task PlayMainBallsIncrementAsync() => PlayRandomAsync(MainBallsIncrementSounds);
+
+    public Task PlayAccidentalIncrementAsync() => PlayRandomAsync(AccidentalIncrementSounds);
+
+    public Task PlayFoulsIncrementAsync() => PlayRandomAsync(FoulsIncrementSounds);
+
+    private async Task PlayRandomAsync(IReadOnlyList<string> fileNames)
+    {
+        if (!appPreferences.GetBoolean(Const.SoundsKey, false) || fileNames.Count == 0)
+        {
+            return;
+        }
+
+        var fileName = fileNames[Random.Shared.Next(fileNames.Count)];
+        await PlayFileAsync(fileName);
+    }
+
+    private async Task PlayFileAsync(string fileName)
+    {
         var stream = await FileSystem.OpenAppPackageFileAsync(fileName);
         var player = audioManager.CreatePlayer(stream);
         player.Volume = Math.Clamp(1.0, 0, 1);
