@@ -18,12 +18,10 @@ public class StatsViewModel : BaseViewModel
     public bool IsEmptyVisible => MatchesCount <= 1;
     public bool IsTableVisible => MatchesCount > 0;
 
-    private int _matchesCount;
-
     public int MatchesCount
     {
-        get => _matchesCount;
-        private set => SetProperty(ref _matchesCount, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public string MatchesCountText => $"Матчей сегодня: {MatchesCount}";

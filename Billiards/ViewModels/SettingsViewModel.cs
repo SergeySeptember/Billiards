@@ -54,6 +54,7 @@ public class SettingsViewModel : BaseViewModel
     }
 
     private bool _isNegativeScore;
+
     public bool IsNegativeScore
     {
         get => _isNegativeScore;
@@ -67,6 +68,7 @@ public class SettingsViewModel : BaseViewModel
     }
 
     private bool _minusRandomBalls;
+
     public bool MinusRandomBalls
     {
         get => _minusRandomBalls;

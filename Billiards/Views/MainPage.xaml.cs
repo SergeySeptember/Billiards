@@ -77,7 +77,7 @@ public partial class MainPage : ContentPage
             return;
         }
 
-        var topInsetPx = insets.GetInsets(WindowInsetsCompat.Type.StatusBars()).Top;
+        var topInsetPx = insets.GetInsets(WindowInsetsCompat.Type.StatusBars())!.Top;
         var density = DeviceDisplay.MainDisplayInfo.Density;
         var topPadding = density > 0 ? topInsetPx / density : 0;
 

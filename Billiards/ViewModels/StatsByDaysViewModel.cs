@@ -13,20 +13,18 @@ public class StatsByDaysViewModel : BaseViewModel
 
     public ObservableCollection<FullMatchStatsRow> Rows { get; } = new();
 
-    private DateTime _selectedDate = DateTime.Today;
-
     public DateTime SelectedDate
     {
-        get => _selectedDate;
+        get;
         set
         {
-            if (SetProperty(ref _selectedDate, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(SelectedDateText));
                 RebuildRows();
             }
         }
-    }
+    } = DateTime.Today;
 
     public string SelectedDateText => SelectedDate.ToString("dd.MM.yyyy");
 
@@ -38,12 +36,10 @@ public class StatsByDaysViewModel : BaseViewModel
 
     public bool IsTableVisible => Rows.Count > 0;
 
-    private int _matchesCount;
-
     public int MatchesCount
     {
-        get => _matchesCount;
-        private set => SetProperty(ref _matchesCount, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public StatsByDaysViewModel(IMatchesStore matchesStore, IAppPreferences appPreferences)

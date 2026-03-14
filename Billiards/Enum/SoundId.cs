@@ -6,5 +6,6 @@ public enum SoundId
     AccidentalPlus,
     Fall,
     Shot,
-    Start
+    Start,
+    BreakShot
 }

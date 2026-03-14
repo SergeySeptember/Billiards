@@ -28,47 +28,39 @@ public class MatchViewModel : BaseViewModel
         "Бесконечная пирамида"
     };
 
-    private bool _isEditable = true;
-
     public bool IsEditable
     {
-        get => _isEditable;
-        set => SetProperty(ref _isEditable, value);
-    }
-
-    private string _selectedGameType;
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     public string SelectedGameType
     {
-        get => _selectedGameType;
-        set => SetProperty(ref _selectedGameType, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     // ----- Игроки -----
     public ObservableCollection<Player> Players => _playersStore.Players;
 
-    private Player? _playerA;
-
     public Player? PlayerA
     {
-        get => _playerA;
+        get;
         set
         {
-            if (SetProperty(ref _playerA, value))
+            if (SetProperty(ref field, value))
             {
                 RefreshBreakerCandidates();
             }
         }
     }
 
-    private Player? _playerB;
-
     public Player? PlayerB
     {
-        get => _playerB;
+        get;
         set
         {
-            if (SetProperty(ref _playerB, value))
+            if (SetProperty(ref field, value))
             {
                 RefreshBreakerCandidates();
             }
@@ -77,22 +69,18 @@ public class MatchViewModel : BaseViewModel
 
     public ObservableCollection<Player> BreakerCandidates { get; } = new();
 
-    private Player? _breakerPlayer;
-
     public Player? BreakerPlayer
     {
-        get => _breakerPlayer;
-        set => SetProperty(ref _breakerPlayer, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string? _breakShotPlayerName;
 
     public string? BreakShotPlayerName
     {
-        get => _breakShotPlayerName;
+        get;
         set
         {
-            if (SetProperty(ref _breakShotPlayerName, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(IsBreakShotA));
                 OnPropertyChanged(nameof(IsBreakShotB));
@@ -104,100 +92,86 @@ public class MatchViewModel : BaseViewModel
     public bool IsBreakShotB => !string.IsNullOrEmpty(BreakShotPlayerName) && BreakShotPlayerName == PlayerB?.Name;
 
     // ----- Счётчики -----
-    private int _mainBallsA;
-
     public int MainBallsA
     {
-        get => _mainBallsA;
+        get;
         set
         {
             if (!_appPreferences.GetBoolean(Const.NegativeScore, false) && value < 0)
             {
                 return;
             }
-            SetProperty(ref _mainBallsA, value);
+            SetProperty(ref field, value);
         }
     }
-
-    private int _mainBallsB;
 
     public int MainBallsB
     {
-        get => _mainBallsB;
+        get;
         set
         {
             if (!_appPreferences.GetBoolean(Const.NegativeScore, false) && value < 0)
             {
                 return;
             }
-            SetProperty(ref _mainBallsB, value);
+            SetProperty(ref field, value);
         }
     }
-
-    private int _accidentalBallsA;
 
     public int AccidentalBallsA
     {
-        get => _accidentalBallsA;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _accidentalBallsA, value);
+                SetProperty(ref field, value);
             }
         }
     }
-
-    private int _accidentalBallsB;
 
     public int AccidentalBallsB
     {
-        get => _accidentalBallsB;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _accidentalBallsB, value);
+                SetProperty(ref field, value);
             }
         }
     }
-
-    private int _foulsA;
 
     public int FoulsA
     {
-        get => _foulsA;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _foulsA, value);
+                SetProperty(ref field, value);
             }
         }
     }
 
-    private int _foulsB;
-
     public int FoulsB
     {
-        get => _foulsB;
+        get;
         set
         {
             if (value >= 0)
             {
-                SetProperty(ref _foulsB, value);
+                SetProperty(ref field, value);
             }
         }
     }
 
     // ----- Таймер -----
-    private string _timerText = "00:00:00";
-
     public string TimerText
     {
-        get => _timerText;
-        set => SetProperty(ref _timerText, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = "00:00:00";
 
     public string StartStopButtonText =>
         !_matchTimer.IsRunning
@@ -242,7 +216,7 @@ public class MatchViewModel : BaseViewModel
         _appPreferences = appPreferences;
         _appDialogService = appDialogService;
 
-        _selectedGameType = GameTypes.First();
+        SelectedGameType = GameTypes.First();
 
         _uiTimer = dispatcher.CreateTimer();
         _uiTimer.Interval = TimeSpan.FromSeconds(1);
@@ -257,13 +231,13 @@ public class MatchViewModel : BaseViewModel
         MainBallsIncrementACommand = new Command(() =>
         {
             MainBallsA++;
-            soundService.PlayAsync(SoundId.Shot);
+            soundService.PlayMainBallsIncrementAsync();
         });
         MainBallsDecrementACommand = new Command(() => MainBallsA--);
         MainBallsIncrementBCommand = new Command(() =>
         {
             MainBallsB++;
-            soundService.PlayAsync(SoundId.Shot);
+            soundService.PlayMainBallsIncrementAsync();
         });
         MainBallsDecrementBCommand = new Command(() => MainBallsB--);
 
@@ -272,13 +246,13 @@ public class MatchViewModel : BaseViewModel
         {
             AccidentalBallsA++;
             MainBallsA++;
-            soundService.PlayAsync(SoundId.AccidentalPlus);
+            soundService.PlayAccidentalIncrementAsync();
         });
         AccidentalBallsIncrementBCommand = new Command(() =>
         {
             AccidentalBallsB++;
             MainBallsB++;
-            soundService.PlayAsync(SoundId.AccidentalPlus);
+            soundService.PlayAccidentalIncrementAsync();
         });
         AccidentalBallsDecrementACommand = new Command(() =>
         {
@@ -309,7 +283,7 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsA--;
             }
-            soundService.PlayAsync(SoundId.Fall);
+            soundService.PlayFoulsIncrementAsync();
         });
         FoulsIncrementBCommand = new Command(() =>
         {
@@ -323,7 +297,7 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsB--;
             }
-            soundService.PlayAsync(SoundId.Fall);
+            soundService.PlayFoulsIncrementAsync();
         });
         FoulsDecrementACommand = new Command(() =>
         {
@@ -369,7 +343,7 @@ public class MatchViewModel : BaseViewModel
             IsEditable = false;
 
             OnPropertyChanged(nameof(StartStopButtonText));
-            _soundService.PlayAsync(SoundId.Start);
+            _soundService.PlayStartButtonAsync();
             return;
         }
 
@@ -556,6 +530,7 @@ public class MatchViewModel : BaseViewModel
             {
                 MainBallsB++;
             }
+            _soundService.PlayAsync(SoundId.BreakShot);
         }
         if (BreakShotPlayerName is not null)
         {

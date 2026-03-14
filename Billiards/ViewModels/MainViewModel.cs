@@ -12,11 +12,9 @@ public class MainViewModel(SettingsViewModel settingsVm, MatchViewModel matchVm,
         statsVm
     };
 
-    private int _currentIndex = 1;
-
     public int CurrentIndex
     {
-        get => _currentIndex;
-        set => SetProperty(ref _currentIndex, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = 1;
 }

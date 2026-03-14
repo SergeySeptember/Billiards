@@ -18,8 +18,7 @@ public sealed class StatsDatePickerService : IStatsDatePickerService
         }
 
         var builder = MaterialDatePicker.Builder.DatePicker();
-        builder.SetTitleText("\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0435\u043D\u044C");
-        builder.SetSelection(new Long(ToUtcMilliseconds(selectedDate)));
+        builder.SetSelection(Long.ValueOf(ToUtcMilliseconds(selectedDate)));
 
         if (datesWithMatches.Count > 0)
         {
@@ -111,7 +110,7 @@ public sealed class StatsDatePickerService : IStatsDatePickerService
         {
             try
             {
-                return _dates.Contains(new DateOnly(year, month + 1, day));
+                return _dates.Contains(new(year, month + 1, day));
             }
             catch
             {

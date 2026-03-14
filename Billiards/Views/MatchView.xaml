@@ -245,14 +245,16 @@
                             ItemDisplayBinding="{Binding Name}"
                             SelectedItem="{Binding BreakerPlayer, Mode=TwoWay}"
                             IsEnabled="{Binding IsEditable}"
-                            Style="{StaticResource PlayerPickerStyle}" />
+                            Style="{StaticResource PlayerPickerStyle}" 
+                            FontAttributes = "None"/>
                 </Grid>
 
                 <!-- Забитые -->
                 <Label Grid.Row="3"
                        Grid.ColumnSpan="2"
                        Text="Забитые шары"
-                       Style="{StaticResource SectionTitleStyle}" />
+                       Style="{StaticResource SectionTitleStyle}" 
+                       TranslationY="6"/>
 
                 <Grid Grid.Row="4" Grid.ColumnSpan="2" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -289,7 +291,8 @@
                 <Label Grid.Row="6"
                        Grid.ColumnSpan="2"
                        Text="Дураки"
-                       Style="{StaticResource SectionTitleStyle}" />
+                       Style="{StaticResource SectionTitleStyle}" 
+                       TranslationY="12" />
 
                 <Grid Grid.Row="7" Grid.ColumnSpan="2" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -326,7 +329,8 @@
                 <Label Grid.Row="9"
                        Grid.ColumnSpan="2"
                        Text="Штрафы"
-                       Style="{StaticResource SectionTitleStyle}" />
+                       Style="{StaticResource SectionTitleStyle}" 
+                       TranslationY="12"/>
 
                 <Grid Grid.Row="10" Grid.ColumnSpan="2" ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -364,7 +368,8 @@
                        Grid.ColumnSpan="2"
                        HorizontalOptions="Center"
                        FontSize="32"
-                       Text="{Binding TimerText}" />
+                       Text="{Binding TimerText}" 
+                       TranslationY="4" />
 
                 <!-- Кнопки: Старт/Стоп + Новая партия -->
                 <Grid Grid.Row="13"
