@@ -53,11 +53,12 @@ public partial class MainPage : ContentPage
         {
             ApplyAndroidNavigationBarOverlay();
         }
-        else if (RootCarousel.Margin.Top != 0)
+        else if (RootContainer.Margin.Top != 0)
         {
-            RootCarousel.Margin = new Thickness(0);
+            RootContainer.Margin = new Thickness(0);
         }
         RootCarousel.InvalidateMeasure();
+        RootContainer.InvalidateMeasure();
         InvalidateMeasure();
         (Content as VisualElement)?.InvalidateMeasure();
     }
@@ -83,16 +84,18 @@ public partial class MainPage : ContentPage
         var topPadding = density > 0 ? systemBarInsets.Top / density : 0;
         var rightPadding = density > 0 ? systemBarInsets.Right / density : 0;
         var bottomPadding = density > 0 ? systemBarInsets.Bottom / density : 0;
+        var contentBottomPadding = Math.Max(0, bottomPadding - 12);
 
-        if (Math.Abs(Padding.Left - leftPadding) < 0.5
-            && Math.Abs(Padding.Top - topPadding) < 0.5
-            && Math.Abs(Padding.Right - rightPadding) < 0.5
-            && Math.Abs(Padding.Bottom - bottomPadding) < 0.5)
+        if (Math.Abs(Padding.Top - topPadding) < 0.5
+            && Math.Abs(RootContainer.Padding.Left - leftPadding) < 0.5
+            && Math.Abs(RootContainer.Padding.Right - rightPadding) < 0.5
+            && Math.Abs(RootContainer.Padding.Bottom - contentBottomPadding) < 0.5)
         {
             return;
         }
 
-        Padding = new Thickness(leftPadding, topPadding, rightPadding, bottomPadding);
+        Padding = new Thickness(0, topPadding, 0, 0);
+        RootContainer.Padding = new Thickness(leftPadding, 0, rightPadding, contentBottomPadding);
     }
 
     private void ApplyAndroidNavigationBarOverlay()
@@ -113,12 +116,12 @@ public partial class MainPage : ContentPage
         var density = DeviceDisplay.MainDisplayInfo.Density;
         var overlayTop = density > 0 ? -(actionBarHeightPx / density) : 0;
 
-        if (Math.Abs(RootCarousel.Margin.Top - overlayTop) < 0.5)
+        if (Math.Abs(RootContainer.Margin.Top - overlayTop) < 0.5)
         {
             return;
         }
 
-        RootCarousel.Margin = new Thickness(0, overlayTop, 0, 0);
+        RootContainer.Margin = new Thickness(0, overlayTop, 0, 0);
     }
 #else
     private void ApplyAndroidSystemBarInsets()
