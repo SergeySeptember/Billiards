@@ -16,16 +16,15 @@ public partial class StatsByDaysPage : ContentPage
         _datePickerService = datePickerService;
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        NavigationPage.SetHasNavigationBar(this, true);
+        NavigationPage.SetHasBackButton(this, true);
+    }
+
     private void OnPickDateClicked(object? sender, EventArgs e)
     {
         _datePickerService.Show(_vm.SelectedDate, _vm.DatesWithMatches, selectedDate => _vm.SelectedDate = selectedDate);
-    }
-
-    private async void OnBackClicked(object? sender, EventArgs e)
-    {
-        if (Navigation.NavigationStack.Count > 1)
-        {
-            await Navigation.PopAsync();
-        }
     }
 }
