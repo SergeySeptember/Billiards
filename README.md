@@ -5,7 +5,7 @@
 Проект написан на **.NET 10** и собран как **Android-only** приложение на **.NET MAUI**. Под iOS, Windows и другие платформы проект не поддерживается.
 
 <p>
-  <a href="https://drive.google.com/file/d/1aiRNj88-MSCH-0fCK2cAq7kQ-_kilvF2/view">
+  <a href="https://drive.google.com/file/d/165MXfgD431EEQ-0kzqCixGKhF406ivbM/view">
     <img src="https://img.shields.io/badge/Download-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download APK">
   </a>
 </p>
