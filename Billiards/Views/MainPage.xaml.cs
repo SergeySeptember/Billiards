@@ -48,7 +48,7 @@ public partial class MainPage : ContentPage
     {
         NavigationPage.SetHasNavigationBar(this, false);
         NavigationPage.SetHasBackButton(this, false);
-        ApplyAndroidStatusBarInset();
+        ApplyAndroidSystemBarInsets();
         if (applyOverlay)
         {
             ApplyAndroidNavigationBarOverlay();
@@ -63,7 +63,7 @@ public partial class MainPage : ContentPage
     }
 
 #if ANDROID
-    private void ApplyAndroidStatusBarInset()
+    private void ApplyAndroidSystemBarInsets()
     {
         var decorView = Platform.CurrentActivity?.Window?.DecorView;
         if (decorView is null)
@@ -77,16 +77,22 @@ public partial class MainPage : ContentPage
             return;
         }
 
-        var topInsetPx = insets.GetInsets(WindowInsetsCompat.Type.StatusBars())!.Top;
+        var systemBarInsets = insets.GetInsets(WindowInsetsCompat.Type.SystemBars())!;
         var density = DeviceDisplay.MainDisplayInfo.Density;
-        var topPadding = density > 0 ? topInsetPx / density : 0;
+        var leftPadding = density > 0 ? systemBarInsets.Left / density : 0;
+        var topPadding = density > 0 ? systemBarInsets.Top / density : 0;
+        var rightPadding = density > 0 ? systemBarInsets.Right / density : 0;
+        var bottomPadding = density > 0 ? systemBarInsets.Bottom / density : 0;
 
-        if (Math.Abs(Padding.Top - topPadding) < 0.5)
+        if (Math.Abs(Padding.Left - leftPadding) < 0.5
+            && Math.Abs(Padding.Top - topPadding) < 0.5
+            && Math.Abs(Padding.Right - rightPadding) < 0.5
+            && Math.Abs(Padding.Bottom - bottomPadding) < 0.5)
         {
             return;
         }
 
-        Padding = new Thickness(0, topPadding, 0, 0);
+        Padding = new Thickness(leftPadding, topPadding, rightPadding, bottomPadding);
     }
 
     private void ApplyAndroidNavigationBarOverlay()
@@ -115,7 +121,7 @@ public partial class MainPage : ContentPage
         RootCarousel.Margin = new Thickness(0, overlayTop, 0, 0);
     }
 #else
-    private void ApplyAndroidStatusBarInset()
+    private void ApplyAndroidSystemBarInsets()
     {
     }
 
