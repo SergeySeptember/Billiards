@@ -360,7 +360,7 @@ public class SettingsViewModel : BaseViewModel
             "Удалить игрока",
             names,
             "Отмена");
-        if (string.IsNullOrWhiteSpace(selected))
+        if (string.Equals(selected, "Отмена", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
